@@ -1,10 +1,16 @@
-﻿namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
+﻿using System.Xml.Linq;
+
+namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
-    internal sealed class NegationNode : TreeNode
+    public sealed class NegationNode : TreeNode
     {
         protected override bool Evaluate()
         {
             return !Left!.Evaluation;
+        }
+        public override string ToString()
+        {
+            return $"{(char)LogicalSymbols.LeftBracket}{(char)LogicalSymbols.Negation}{Left}{(char)LogicalSymbols.RightBracket}";
         }
     }
 }

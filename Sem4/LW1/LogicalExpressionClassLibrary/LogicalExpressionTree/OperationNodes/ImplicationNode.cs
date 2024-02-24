@@ -1,6 +1,6 @@
 ﻿namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
-    internal sealed class ImplicationNode : TreeNode
+    public sealed class ImplicationNode : TreeNode
     {
         protected override bool Evaluate()
         {
@@ -9,6 +9,10 @@
                 return false;
             }
             return true;
+        }
+        public override string ToString()
+        {
+            return $"{(char)LogicalSymbols.LeftBracket}{Left}{(char)LogicalSymbols.Implication}{Right}{(char)LogicalSymbols.RightBracket}";
         }
     }
 }

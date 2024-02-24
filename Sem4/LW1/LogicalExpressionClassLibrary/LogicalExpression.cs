@@ -40,6 +40,10 @@ namespace LogicalExpressionClassLibrary
             else throw new ArgumentException($"Uninitialized variable '{varName}' addressed");
         }
 
+        public override string ToString()
+        {
+            return _root != null ? string.Empty : _root!.ToString()!;
+        }
         private TreeNode BuildExpressionTree(string input)
         {
             throw new NotImplementedException();

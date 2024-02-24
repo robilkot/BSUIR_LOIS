@@ -1,6 +1,6 @@
 ﻿namespace LogicalExpressionClassLibrary.LogicalExpressionTree
 {
-    internal abstract class TreeNode
+    public abstract class TreeNode
     {
         private TreeNode? _right = null;
         public TreeNode? Right

@@ -1,6 +1,6 @@
 ﻿namespace LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes
 {
-    internal sealed class AtomicFormulaNode : TreeNode
+    public sealed class AtomicFormulaNode : TreeNode
     {
         private string _name = string.Empty;
         public string Name
@@ -59,6 +59,10 @@
                 }
             }
             return true;
+        }
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
