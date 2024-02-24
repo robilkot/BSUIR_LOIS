@@ -1,5 +1,6 @@
 ﻿using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
+using System.Collections;
 
 namespace LogicalExpressionClassLibrary
 {
@@ -47,6 +48,81 @@ namespace LogicalExpressionClassLibrary
         private TreeNode BuildExpressionTree(string input)
         {
             throw new NotImplementedException();
+        }
+
+        public List<Dictionary<TreeNode, bool>> BuildTruthTable()
+        {
+            static void NextCombination(BitArray bits)
+            {
+                for (int i = bits.Length - 1; i >= 0; i--)
+                {
+                    bits[i] = !bits[i];
+
+                    // If changed value was 0, no need update bits on left side from it
+                    if (bits[i])
+                    {
+                        break;
+                    }
+                }
+            }
+
+            static void StoreEvaluation(Dictionary<TreeNode, bool> truthRow, TreeNode? root)
+            {
+                if(root is null)
+                {
+                    return;
+                }
+
+                truthRow[root] = root.Evaluation;
+
+                StoreEvaluation(truthRow, root.Left);
+                StoreEvaluation(truthRow, root.Right);
+            }
+
+            if (_root is null)
+            {
+                throw new InvalidOperationException("Expression is not set");
+            }
+
+            List<Dictionary<TreeNode, bool>> truthTable = [];
+
+            // Preserve initial state before checking all combinations of variables
+            // todo: Seems unoptimal but copying the whole tree is not a good idea either
+            Dictionary<AtomicFormulaNode, bool> initialVariablesState = [];
+
+            foreach(var v in _variables.Values)
+            {
+                initialVariablesState[v] = v.Value;
+            }
+
+            // Mask indicates which variables will be true
+            BitArray variablesTruthMask = new(_variables.Count, false);
+
+            while(!variablesTruthMask.HasAllSet())
+            {
+                int variableIndex = 0; 
+                foreach(var v in _variables.Values)
+                {
+                    v.Value = variablesTruthMask[variableIndex];
+                    variableIndex++;
+                }
+
+                Dictionary<TreeNode, bool> truthRow = [];
+
+                StoreEvaluation(truthRow, _root);
+
+                truthTable.Add(truthRow);
+
+                NextCombination(variablesTruthMask);
+            }
+
+            // Revert to initial values
+            foreach (var kv in initialVariablesState)
+            {
+                kv.Key.Value = kv.Value;
+            }
+
+            return truthTable;
         }
     }
 }
