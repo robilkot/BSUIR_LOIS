@@ -37,11 +37,7 @@
         }
         protected override bool Evaluate()
         {
-            if(_parentExpression is null)
-            {
-                throw new InvalidOperationException("No context given for evaluation");
-            }
-            return _parentExpression.GetVariable(Name);
+            return Value;
         }
 
         private static bool ValidateName(string name)
