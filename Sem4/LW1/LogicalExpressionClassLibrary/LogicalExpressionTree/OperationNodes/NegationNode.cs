@@ -2,9 +2,9 @@
 {
     internal sealed class NegationNode : TreeNode
     {
-        public override bool Evaluate()
+        protected override bool Evaluate()
         {
-            return !Left!.Evaluate();
+            return !Left!.Evaluation;
         }
     }
 }

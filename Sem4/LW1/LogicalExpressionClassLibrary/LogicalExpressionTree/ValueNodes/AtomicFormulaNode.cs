@@ -5,10 +5,7 @@
         private string _name = string.Empty;
         public string Name
         {
-            get
-            {
-                return _name;
-            }
+            get { return _name; }
             set
             {
                 if (!ValidateName(value))
@@ -20,11 +17,25 @@
             }
         }
 
+        private bool _value = false;
+        public bool Value
+        {
+            get { return _value; }
+            set
+            {
+                if (_value != value)
+                {
+                    ClearEvaluation();
+                    _value = value;
+                }
+            }
+        }
+
         public AtomicFormulaNode(string name)
         {
             Name = name;
         }
-        public override bool Evaluate()
+        protected override bool Evaluate()
         {
             if(_parentExpression is null)
             {

@@ -2,11 +2,13 @@
 {
     internal sealed class ImplicationNode : TreeNode
     {
-        public override bool Evaluate()
+        protected override bool Evaluate()
         {
-            // todo
-            throw new NotImplementedException();
-            //return Left!.Evaluate() && Right!.Evaluate();
+            if(Left!.Evaluation && !Right!.Evaluation)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -2,9 +2,9 @@
 {
     internal sealed class DisjunctionNode : TreeNode
     {
-        public override bool Evaluate()
+        protected override bool Evaluate()
         {
-            return Left!.Evaluate() && Right!.Evaluate();
+            return Left!.Evaluation && Right!.Evaluation;
         }
     }
 }

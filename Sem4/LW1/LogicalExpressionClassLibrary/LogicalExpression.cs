@@ -1,15 +1,11 @@
 ﻿using LogicalExpressionClassLibrary.LogicalExpressionTree;
+using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 
 namespace LogicalExpressionClassLibrary
 {
     public class LogicalExpression
     {
-        private readonly Dictionary<string, bool> _variables = [];
-        // todo: implement after everything else is done to speed up evaluation.
-        // maybe move this to treenodes?
-        // also perform benchmark
-        // also check for 32 variables (c)
-        //private readonly Dictionary<TreeNode, bool> _cachedEvaluations = [];
+        private readonly Dictionary<string, AtomicFormulaNode> _variables = [];
 
         private TreeNode? _root = null;
 
@@ -25,25 +21,25 @@ namespace LogicalExpressionClassLibrary
                 throw new InvalidOperationException("Expression is not set");
             }
 
-            return _root.Evaluate();
+            return _root.Evaluation;
         }
         public bool GetVariable(string varName)
         {
-            if (_variables.TryGetValue(varName, out bool variableValue) == true)
+            if (_variables.TryGetValue(varName, out var variable) == true)
             {
-                return variableValue;
+                return variable.Value;
             }
             else throw new ArgumentException($"Uninitialized variable '{varName}' addressed");
         }
         public void SetVariable(string varName, bool variableValue)
         {
-            _variables[varName] = variableValue;
+            if(_variables.TryGetValue(varName, out var variable))
+            {
+                variable.Value = variableValue;
+            }
+            else throw new ArgumentException($"Uninitialized variable '{varName}' addressed");
         }
 
-        public void ClearVariables()
-        {
-            _variables.Clear();
-        }
         private TreeNode BuildExpressionTree(string input)
         {
             throw new NotImplementedException();
