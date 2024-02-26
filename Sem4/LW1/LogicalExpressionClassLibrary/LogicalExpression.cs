@@ -50,7 +50,7 @@ namespace LogicalExpressionClassLibrary
             throw new NotImplementedException();
         }
 
-        public List<Dictionary<TreeNode, bool>> BuildTruthTable()
+        public List<Dictionary<string, bool>> BuildTruthTable()
         {
             static void NextCombination(BitArray bits)
             {
@@ -66,14 +66,14 @@ namespace LogicalExpressionClassLibrary
                 }
             }
 
-            static void StoreEvaluation(Dictionary<TreeNode, bool> truthRow, TreeNode? root)
+            static void StoreEvaluation(Dictionary<string, bool> truthRow, TreeNode? root)
             {
                 if(root is null)
                 {
                     return;
                 }
 
-                truthRow[root] = root.Evaluation;
+                truthRow[root.ToString()!] = root.Evaluation;
 
                 StoreEvaluation(truthRow, root.Left);
                 StoreEvaluation(truthRow, root.Right);
@@ -84,7 +84,7 @@ namespace LogicalExpressionClassLibrary
                 throw new InvalidOperationException("Expression is not set");
             }
 
-            List<Dictionary<TreeNode, bool>> truthTable = [];
+            List<Dictionary<string, bool>> truthTable = [];
 
             // Preserve initial state before checking all combinations of variables
             // todo: Seems unoptimal but copying the whole tree is not a good idea either
@@ -107,7 +107,7 @@ namespace LogicalExpressionClassLibrary
                     variableIndex++;
                 }
 
-                Dictionary<TreeNode, bool> truthRow = [];
+                Dictionary<string, bool> truthRow = [];
 
                 StoreEvaluation(truthRow, _root);
 
