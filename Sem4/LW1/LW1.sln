@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogicalExpressionClassLibrary", "LogicalExpressionClassLibrary\LogicalExpressionClassLibrary.csproj", "{0D025DA3-7A80-4F7E-AA4E-2194ADEE2952}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogicalExpressionUnitTest", "LogicalExpressionUnitTest\LogicalExpressionUnitTest.csproj", "{217F3C31-4BF7-4209-830E-F9610CDC35D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogicalExpressionUnitTest", "LogicalExpressionUnitTest\LogicalExpressionUnitTest.csproj", "{217F3C31-4BF7-4209-830E-F9610CDC35D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogicalExpressionConsoleApp", "LogicalExpressionConsoleApp\LogicalExpressionConsoleApp.csproj", "{F5D48C87-A51C-4E51-97E4-2EE55C2D1BAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{217F3C31-4BF7-4209-830E-F9610CDC35D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{217F3C31-4BF7-4209-830E-F9610CDC35D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{217F3C31-4BF7-4209-830E-F9610CDC35D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5D48C87-A51C-4E51-97E4-2EE55C2D1BAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5D48C87-A51C-4E51-97E4-2EE55C2D1BAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5D48C87-A51C-4E51-97E4-2EE55C2D1BAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5D48C87-A51C-4E51-97E4-2EE55C2D1BAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

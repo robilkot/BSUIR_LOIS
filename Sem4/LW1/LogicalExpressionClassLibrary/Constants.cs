@@ -2,8 +2,10 @@
 {
     public enum LogicalSymbols
     {
-        Disjunction = '∨',
-        Conjunction = '∧',
+        //Disjunction = '∨',
+        //Conjunction = '∧',
+        Disjunction = '|',
+        Conjunction = '&',
         LeftBracket = '(',
         RightBracket = ')',
         Equality = '~',

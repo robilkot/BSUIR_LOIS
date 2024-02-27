@@ -31,7 +31,7 @@
             }
         }
 
-        public AtomicFormulaNode(string name)
+        public AtomicFormulaNode(string name) : base(null, null)
         {
             Name = name;
         }
@@ -43,7 +43,7 @@
         private static bool ValidateName(string name)
         {
             // First symbol must be a letter
-            if (!name.Any() || !char.IsLetter(name[0]))
+            if (name.Length == 0 || !char.IsLetter(name[0]))
             {
                 return false;
             }

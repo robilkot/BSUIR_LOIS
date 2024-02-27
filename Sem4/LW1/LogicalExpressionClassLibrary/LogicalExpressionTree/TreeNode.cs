@@ -39,6 +39,11 @@
                 return (bool)_evaluation;
             }
         }
+        public TreeNode(TreeNode? left, TreeNode? right)
+        {
+            Right = right;
+            Left = left;
+        }
         protected abstract bool Evaluate();
         public void ClearEvaluation()
         {

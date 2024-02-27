@@ -4,6 +4,7 @@ namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
     public sealed class NegationNode : TreeNode
     {
+        public NegationNode(TreeNode? left) : base(left, null) { }
         protected override bool Evaluate()
         {
             return !Left!.Evaluation;

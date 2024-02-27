@@ -1,4 +1,5 @@
 ﻿using LogicalExpressionClassLibrary.LogicalExpressionTree;
+using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using System.Collections;
 
@@ -6,6 +7,20 @@ namespace LogicalExpressionClassLibrary
 {
     public class LogicalExpression
     {
+        private static readonly Dictionary<LogicalSymbols, Func<TreeNode, TreeNode, TreeNode>> _binaryOperatorsNodes = new()
+            {
+                { LogicalSymbols.Conjunction, (left, right) => new ConjunctionNode(left, right) },
+                { LogicalSymbols.Disjunction, (left, right) => new DisjunctionNode(left, right) },
+                { LogicalSymbols.Implication, (left, right) => new ImplicationNode(left, right) },
+                { LogicalSymbols.Equality,    (left, right) => new EqualityNode(left, right) },
+            };
+
+        private static readonly Dictionary<LogicalSymbols, Func<TreeNode>> _constNodes = new()
+            {
+                { LogicalSymbols.True, () => TrueNode.GetInstance() },
+                { LogicalSymbols.False, () => FalseNode.GetInstance() },
+            };
+
         private readonly Dictionary<string, AtomicFormulaNode> _variables = [];
 
         private TreeNode? _root = null;
@@ -18,10 +33,11 @@ namespace LogicalExpressionClassLibrary
                 return new(_truthTable);
             }
         }
-
         public LogicalExpression(string input)
         {
-            _root = BuildExpressionTree(input);
+            int runningIndex = 0;
+
+            _root = BuildFormulaTree(input, ref runningIndex);
         }
 
         public bool Evaluate()
@@ -56,11 +72,111 @@ namespace LogicalExpressionClassLibrary
 
         public override string ToString()
         {
-            return _root != null ? string.Empty : _root!.ToString()!;
+            return _root == null ? string.Empty : _root!.ToString()!;
         }
-        private TreeNode BuildExpressionTree(string input)
+        private TreeNode BuildFormulaTree(string input, ref int i)
         {
-            throw new NotImplementedException();
+            static string extractVariableName(string input, ref int runningIndex)
+            {
+                int beginIndex = runningIndex;
+
+                if (input[++runningIndex] == '0')
+                {
+                    throw new ArgumentException("Atomic formula's first digit can't be zero");
+                }
+
+                while (runningIndex < input.Length && char.IsDigit(input[runningIndex]))
+                {
+                    runningIndex++;
+                }
+
+                // Account for outer increment in parser for loop
+                runningIndex--;
+
+                return input[beginIndex..(runningIndex + 1)];
+            }
+
+            Stack<TreeNode> stack = new();
+            int indent = 0;
+
+            for (; i < input.Length; i++)
+            {
+                // Encountered symbol is variable or const
+                if (char.IsLetter(input[i]))
+                {
+                    var variableName = extractVariableName(input, ref i);
+
+                    if (variableName.Length == 1 && Enum.IsDefined(typeof(LogicalSymbols), (int)variableName[0]))
+                    {
+                        var nodeGeneratingFunc = _constNodes[(LogicalSymbols)variableName[0]];
+
+                        stack.Push(nodeGeneratingFunc());
+                    }
+                    else
+                    {
+                        var atomicFormulaNode = new AtomicFormulaNode(variableName);
+
+                        // Store variable name association with node for expression
+                        _variables[variableName] = atomicFormulaNode;
+
+                        stack.Push(atomicFormulaNode);
+                    }
+                }
+
+                // Encountered symbol is unary (negation) operator
+                else if (input[i] == (char)LogicalSymbols.Negation)
+                {
+                    i++;
+
+                    // todo: what if empty input after negation
+                    var childFormula = BuildFormulaTree(input, ref i);
+
+                    return new NegationNode(childFormula);
+                }
+
+                // Encountered symbol is binary operator
+                else if (_binaryOperatorsNodes.TryGetValue((LogicalSymbols)input[i], out var nodeGenerator))
+                {
+                    if (stack.Count == 0)
+                    {
+                        string exceptionCommentary = input.Insert(i, "__?__");
+                        throw new ArgumentException($"Missing operand before '{input[i]}' (index {i}): {exceptionCommentary}");
+                    }
+
+                    i++;
+
+                    var left = stack.Pop();
+                    var right = BuildFormulaTree(input, ref i);
+
+                    return nodeGenerator(left, right);
+                }
+
+                else if (input[i] == (char)LogicalSymbols.LeftBracket)
+                {
+                    indent++;
+
+                    if (indent > 0)
+                    {
+                        i++;
+
+                        var newNode = BuildFormulaTree(input, ref i);
+
+                        stack.Push(newNode);
+                    }
+                }
+                else if (input[i] == (char)LogicalSymbols.RightBracket)
+                {
+                    indent--;
+
+                    // Stop parsing inner expression
+                    if (indent <= 0)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return stack.Pop();
         }
 
         private List<Dictionary<string, bool>> BuildTruthTable()
@@ -81,7 +197,7 @@ namespace LogicalExpressionClassLibrary
 
             static void StoreEvaluation(Dictionary<string, bool> truthRow, TreeNode? root)
             {
-                if(root is null)
+                if (root is null)
                 {
                     return;
                 }
@@ -103,7 +219,7 @@ namespace LogicalExpressionClassLibrary
             // todo: Seems unoptimal but copying the whole tree is not a good idea either
             Dictionary<AtomicFormulaNode, bool> initialVariablesState = [];
 
-            foreach(var v in _variables.Values)
+            foreach (var v in _variables.Values)
             {
                 initialVariablesState[v] = v.Value;
             }
@@ -111,10 +227,10 @@ namespace LogicalExpressionClassLibrary
             // Mask indicates which variables will be true
             BitArray variablesTruthMask = new(_variables.Count, false);
 
-            while(!variablesTruthMask.HasAllSet())
+            while (!variablesTruthMask.HasAllSet())
             {
-                int variableIndex = 0; 
-                foreach(var v in _variables.Values)
+                int variableIndex = 0;
+                foreach (var v in _variables.Values)
                 {
                     v.Value = variablesTruthMask[variableIndex];
                     variableIndex++;
