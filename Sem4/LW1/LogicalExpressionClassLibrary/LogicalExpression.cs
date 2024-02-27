@@ -9,6 +9,15 @@ namespace LogicalExpressionClassLibrary
         private readonly Dictionary<string, AtomicFormulaNode> _variables = [];
 
         private TreeNode? _root = null;
+        private List<Dictionary<string, bool>>? _truthTable;
+        public List<Dictionary<string, bool>> TruthTable
+        {
+            get
+            {
+                _truthTable ??= BuildTruthTable();
+                return new(_truthTable);
+            }
+        }
 
         public LogicalExpression(string input)
         {
@@ -34,9 +43,13 @@ namespace LogicalExpressionClassLibrary
         }
         public void SetVariable(string varName, bool variableValue)
         {
-            if(_variables.TryGetValue(varName, out var variable))
+            if (_variables.TryGetValue(varName, out var variable))
             {
-                variable.Value = variableValue;
+                if (variableValue != variable.Value)
+                {
+                    variable.Value = variableValue;
+
+                }
             }
             else throw new ArgumentException($"Uninitialized variable '{varName}' addressed");
         }
@@ -50,7 +63,7 @@ namespace LogicalExpressionClassLibrary
             throw new NotImplementedException();
         }
 
-        public List<Dictionary<string, bool>> BuildTruthTable()
+        private List<Dictionary<string, bool>> BuildTruthTable()
         {
             static void NextCombination(BitArray bits)
             {
