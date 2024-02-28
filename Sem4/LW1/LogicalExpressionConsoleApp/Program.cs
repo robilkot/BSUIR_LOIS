@@ -2,6 +2,7 @@
 
 List<string> tests = new()
 {
+    "B",
     "((A1|(A2&A3))|B1)",
     "((A1|F)|T)",
     "(¬(¬A123))",

@@ -4,24 +4,19 @@ namespace LogicalExpressionUnitTest
 {
     public class UnitTest1
     {
-        [Fact]
-        public void Test1()
+        [Theory]
+        [InlineData("A123")]
+        [InlineData("B")]
+        [InlineData("C1")]
+        [InlineData("((A1|(A2&A3))|B1)")]
+        [InlineData("((A1|F)|T)")]
+        [InlineData("(¬(¬A123))")]
+        [InlineData("((A1|(B2&A3))|B1)")]
+        public void Parsing_shouldEqual(string input)
         {
-            string input = "(A123)";
-
             LogicalExpression expr = new(input);
 
-            //FalseNode node = new();
-
-            //NegationNode node2 = new();
-            //node2.Left = node;
-
-            //NegationNode node3 = new();
-            //node3.Left = node2;
-
-            //var str = node3.ToString();
-
-            //_ = LogicalExpression.BuildTruthTable();
+            Assert.Equal(input, expr.ToString());
         }
     }
 }

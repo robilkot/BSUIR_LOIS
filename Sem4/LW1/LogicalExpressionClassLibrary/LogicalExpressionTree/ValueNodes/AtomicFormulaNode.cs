@@ -47,15 +47,19 @@
             {
                 return false;
             }
-            if (name.Length == 2 && name[1] == '0')
+            if (name.Length > 1)
             {
-                return false;
-            }
-            for (int i = 1; i < name.Length; i++)
-            {
-                if (!char.IsDigit(name[i]))
+                if(name[1] == '0')
                 {
                     return false;
+                }
+
+                for (int i = 1; i < name.Length; i++)
+                {
+                    if (!char.IsDigit(name[i]))
+                    {
+                        return false;
+                    }
                 }
             }
             return true;

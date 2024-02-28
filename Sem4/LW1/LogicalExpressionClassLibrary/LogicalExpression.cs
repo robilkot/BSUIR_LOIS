@@ -80,20 +80,28 @@ namespace LogicalExpressionClassLibrary
             {
                 int beginIndex = runningIndex;
 
-                if (input[++runningIndex] == '0')
+                // Account for letter-only atomic formulas
+                if(beginIndex == input.Length - 1)
+                {
+                    return input[beginIndex..(beginIndex + 1)];
+                }
+
+                int endIndex = beginIndex;
+
+                if (input[++endIndex] == '0')
                 {
                     throw new ArgumentException("Atomic formula's first digit can't be zero");
                 }
 
-                while (runningIndex < input.Length && char.IsDigit(input[runningIndex]))
+                while (endIndex < input.Length && char.IsDigit(input[endIndex]))
                 {
-                    runningIndex++;
+                    endIndex++;
                 }
 
                 // Account for outer increment in parser for loop
-                runningIndex--;
+                runningIndex = endIndex - 1;
 
-                return input[beginIndex..(runningIndex + 1)];
+                return input[beginIndex..endIndex];
             }
 
             Stack<TreeNode> stack = new();
