@@ -2,6 +2,7 @@
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using System.Collections;
+using System.Text;
 
 namespace LogicalExpressionClassLibrary
 {
@@ -81,7 +82,7 @@ namespace LogicalExpressionClassLibrary
                 int beginIndex = runningIndex;
 
                 // Account for letter-only atomic formulas
-                if(beginIndex == input.Length - 1)
+                if (beginIndex == input.Length - 1)
                 {
                     return input[beginIndex..(beginIndex + 1)];
                 }
@@ -235,7 +236,7 @@ namespace LogicalExpressionClassLibrary
             // Mask indicates which variables will be true
             BitArray variablesTruthMask = new(_variables.Count, false);
 
-            while (!variablesTruthMask.HasAllSet())
+            do
             {
                 int variableIndex = 0;
                 foreach (var v in _variables.Values)
@@ -251,7 +252,7 @@ namespace LogicalExpressionClassLibrary
                 truthTable.Add(truthRow);
 
                 NextCombination(variablesTruthMask);
-            }
+            } while (variablesTruthMask.HasAnySet());
 
             // Revert to initial values
             foreach (var kv in initialVariablesState)
@@ -260,6 +261,43 @@ namespace LogicalExpressionClassLibrary
             }
 
             return truthTable;
+        }
+    }
+    public static class LogicalExpressionsExntensions
+    {
+        public static string ToTableString(this List<Dictionary<string, bool>> truthTable)
+        {
+            StringBuilder builder = new();
+
+            foreach (var k in truthTable[0].Keys)
+            {
+                builder.Append($"| {k} ");
+            }
+            builder.Append("|\n");
+
+            int totalLength = builder.Length;
+
+            string separator = string.Empty.PadRight(totalLength - 1, '-') + '\n';
+
+            builder.Append(separator);
+            builder.Insert(0, separator);
+
+            foreach (var dicts in truthTable)
+            {
+                foreach (var kvp in dicts)
+                {
+                    string v = kvp.Value ? "| 1 " : "| 0 ";
+
+                    v = v.PadRight(kvp.Key.Length + 3, ' ');
+
+                    builder.Append($"{v}");
+                }
+                builder.Append("|\n");
+            }
+
+            builder.Append(separator);
+
+            return builder.ToString();
         }
     }
 }

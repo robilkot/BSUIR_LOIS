@@ -2,7 +2,7 @@ using LogicalExpressionClassLibrary;
 
 namespace LogicalExpressionUnitTest
 {
-    public class UnitTest1
+    public class LogicalExpressionUnitTest
     {
         [Theory]
         [InlineData("A123")]
