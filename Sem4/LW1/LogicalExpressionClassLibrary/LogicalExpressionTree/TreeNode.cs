@@ -2,13 +2,17 @@
 {
     public abstract class TreeNode
     {
+        [Flags] public enum DebugLevels 
+        {
+            Clear = 0,
+            Eval = 1,
+            Set = 2
+        }
+        public static DebugLevels DebugLevel = 0;
         private TreeNode? _right = null;
         public TreeNode? Right
         {
-            get
-            {
-                return _right;
-            }
+            get => _right;
             set
             {
                 ClearEvaluation();
@@ -18,10 +22,7 @@
         private TreeNode? _left = null;
         public TreeNode? Left
         {
-            get
-            {
-                return _left;
-            }
+            get => _left;
             set
             {
                 ClearEvaluation();
@@ -29,14 +30,19 @@
             }
         }
         public TreeNode? Parent { get; set; } = null;
-        // Serves caching purpose and will be used in truth tables
+        // Serves caching purpose and is used in truth tables
         private bool? _evaluation = null;
         public bool Evaluation
         {
             get
             {
-                _evaluation ??= Evaluate();
-                return (bool)_evaluation;
+                if (_evaluation == null)
+                {
+                    _evaluation = Evaluate();
+
+                    if ((DebugLevel & DebugLevels.Eval) != 0) Console.WriteLine($"[evl] {ToString()}"); // - {GetType().Name}");
+                }
+                return _evaluation.Value;
             }
         }
         public TreeNode(TreeNode? left, TreeNode? right)
@@ -45,11 +51,28 @@
             Left = left;
         }
         protected abstract bool Evaluate();
-        public void ClearEvaluation()
+        protected void ClearEvaluation()
         {
-            _evaluation = null;
-            // If value is outdated then upper tree part is also outdated
-            Parent?.ClearEvaluation();
+            if (_evaluation != null)
+            {
+                if ((DebugLevel & DebugLevels.Clear) != 0)
+                {
+                    Console.Write($"[clr] {GetType().Name}");
+
+                    if (Parent != null)
+                    {
+                        Console.Write($" with parent {Parent}\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                    }
+                }
+
+                _evaluation = null;
+                // If value is outdated then upper tree part is also outdated
+                Parent?.ClearEvaluation();
+            }
         }
     }
 }

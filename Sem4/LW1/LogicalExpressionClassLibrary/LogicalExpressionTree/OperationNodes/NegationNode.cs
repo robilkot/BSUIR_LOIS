@@ -2,16 +2,10 @@
 
 namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
-    public sealed class NegationNode : TreeNode
+    public sealed class NegationNode(TreeNode? left) : TreeNode(left, null)
     {
-        public NegationNode(TreeNode? left) : base(left, null) { }
-        protected override bool Evaluate()
-        {
-            return !Left!.Evaluation;
-        }
+        protected override bool Evaluate() => !Left!.Evaluation;
         public override string ToString()
-        {
-            return $"{(char)LogicalSymbols.LeftBracket}{(char)LogicalSymbols.Negation}{Left}{(char)LogicalSymbols.RightBracket}";
-        }
+            => $"{(char)LogicalSymbols.LeftBracket}{(char)LogicalSymbols.Negation}{Left}{(char)LogicalSymbols.RightBracket}";
     }
 }

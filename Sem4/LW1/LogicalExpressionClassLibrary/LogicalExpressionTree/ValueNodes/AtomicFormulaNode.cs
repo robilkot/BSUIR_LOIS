@@ -5,7 +5,7 @@
         private string _name = string.Empty;
         public string Name
         {
-            get { return _name; }
+            get => _name;
             set
             {
                 if (!ValidateName(value))
@@ -19,10 +19,16 @@
 
         private bool _value = false;
         public bool Value
+
         {
-            get { return _value; }
+            get => _value;
             set
             {
+                if ((DebugLevel & DebugLevels.Set) != 0)
+                {
+                    Console.WriteLine($"[set] {Name} {value}");
+                }
+
                 if (_value != value)
                 {
                     ClearEvaluation();
@@ -35,10 +41,7 @@
         {
             Name = name;
         }
-        protected override bool Evaluate()
-        {
-            return Value;
-        }
+        protected override bool Evaluate() => Value;
 
         private static bool ValidateName(string name)
         {
@@ -49,7 +52,7 @@
             }
             if (name.Length > 1)
             {
-                if(name[1] == '0')
+                if (name[1] == '0')
                 {
                     return false;
                 }
@@ -64,9 +67,6 @@
             }
             return true;
         }
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
     }
 }

@@ -2,32 +2,35 @@
 
 List<string> tests =
 [
-    "((A1|(A2&A3))|B1)",
-    "B",
-    "((A1|F)|T)",
-    "(¬(¬A123))",
-    "((P|(Q&R))|S)",
-    "((A1|(&A3))|B1)",
+    //"(A1&(A2|(¬(A4|A5))))"
+    //"(A&(B&C))",
+    "(A15&B5)",
+    //"((A1|(A2&A3))|B1)",
+    //"((A1|F)|T)",
+    //"((P|(Q&R))|S)",
+    //"((A1|(&A3))|B1)",
 ];
+
+//LogicalExpression.Debug = true;
+//TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
 
 foreach (var test in tests)
 {
     try
     {
         LogicalExpression expr = new(test);
-        //Console.WriteLine(test);
         Console.WriteLine(expr.ToString());
-        Console.WriteLine(expr.TruthTable.ToTableString());
+        string tableString = expr.ToTruthTableString();
+        Console.WriteLine();
+        Console.WriteLine(tableString);
+
+        expr.SetVariable("A", true);
+        expr.SetVariable("B", false);
+        expr.SetVariable("C", false);
+        Console.WriteLine(expr.Evaluate());
     }
     catch (ArgumentException e)
     {
         Console.WriteLine(e.Message);
     }
-
-    //expr.SetVariable("A1", false);
-    //expr.SetVariable("A2", false);
-    //expr.SetVariable("A3", true);
-    //expr.SetVariable("B1", false);
-
-    //Console.WriteLine(expr.Evaluate());
 }

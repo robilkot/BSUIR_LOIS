@@ -1,19 +1,9 @@
 ﻿namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
-    public sealed class ImplicationNode : TreeNode
+    public sealed class ImplicationNode(TreeNode? left, TreeNode? right) : TreeNode(left, right)
     {
-        public ImplicationNode(TreeNode? left, TreeNode? right) : base(left, right) { }
-        protected override bool Evaluate()
-        {
-            if(Left!.Evaluation && !Right!.Evaluation)
-            {
-                return false;
-            }
-            return true;
-        }
+        protected override bool Evaluate() => !(Left!.Evaluation && !Right!.Evaluation);
         public override string ToString()
-        {
-            return $"{(char)LogicalSymbols.LeftBracket}{Left}{(char)LogicalSymbols.Implication}{Right}{(char)LogicalSymbols.RightBracket}";
-        }
+            => $"{(char)LogicalSymbols.LeftBracket}{Left}{(char)LogicalSymbols.Implication}{Right}{(char)LogicalSymbols.RightBracket}";
     }
 }
