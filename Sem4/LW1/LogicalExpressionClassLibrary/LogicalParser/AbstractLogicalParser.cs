@@ -19,6 +19,6 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 { LogicalSymbols.True, TrueNode.GetInstance() },
                 { LogicalSymbols.False, FalseNode.GetInstance() },
             };
-        public abstract (TreeNode root, Dictionary<string, AtomicFormulaNode> variables) Parse(string input);
+        public abstract (TreeNode root, Dictionary<string, List<AtomicFormulaNode>> variables) Parse(string input);
     }
 }

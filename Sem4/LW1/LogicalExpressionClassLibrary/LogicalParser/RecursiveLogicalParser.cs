@@ -6,7 +6,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 {
     public sealed class RecursiveLogicalParser : AbstractLogicalParser
     {
-        private readonly Dictionary<string, AtomicFormulaNode> _variables = [];
+        private readonly Dictionary<string, List<AtomicFormulaNode>> _variables = [];
         private static string ExtractVariableName(string input, ref int runningIndex)
         {
             int beginIndex = runningIndex;
@@ -34,7 +34,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 
             return input[beginIndex..endIndex];
         }
-        public override (TreeNode, Dictionary<string, AtomicFormulaNode>) Parse(string input)
+        public override (TreeNode, Dictionary<string, List<AtomicFormulaNode>>) Parse(string input)
         {
             _variables.Clear();
 
@@ -62,11 +62,11 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                         throw new ArgumentException($"Unexpected variable '{variableName}' in expression notation");
                     }
 
-                    if (_variables.TryGetValue(variableName, out var alreadyCreatedNode))
-                    {
-                        toReturn = alreadyCreatedNode;
-                    }
-                    else
+                    //if (_variables.TryGetValue(variableName, out var alreadyCreatedNode))
+                    //{
+                    //    toReturn = alreadyCreatedNode;
+                    //}
+                    //else
                     if (variableName.Length == 1 && Enum.IsDefined(typeof(LogicalSymbols), (int)variableName[0]))
                     {
                         toReturn = _constNodes[(LogicalSymbols)variableName[0]];
@@ -76,7 +76,13 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                         var atomicFormulaNode = new AtomicFormulaNode(variableName);
 
                         // Store variable name association with node for expression
-                        _variables[variableName] = atomicFormulaNode;
+                        if (_variables.TryGetValue(variableName, out var alreadyCreatedList))
+                        {
+                            alreadyCreatedList.Add(atomicFormulaNode);
+                        } else
+                        {
+                            _variables.Add(variableName, [atomicFormulaNode]);
+                        }
 
                         toReturn = atomicFormulaNode;
                     }

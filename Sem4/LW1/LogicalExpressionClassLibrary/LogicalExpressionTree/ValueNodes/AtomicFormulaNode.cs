@@ -41,6 +41,10 @@
         {
             Name = name;
         }
+        public AtomicFormulaNode(AtomicFormulaNode other) : base(null, null)
+        {
+            _name = other._name;
+        }
         protected override bool Evaluate() => Value;
 
         private static bool ValidateName(string name)

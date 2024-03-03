@@ -35,7 +35,7 @@ namespace LogicalExpressionUnitTest
             expr.SetVariable("A2", A2);
             expr.SetVariable("A3", A3);
 
-            var actualResult = expr.Evaluate();
+            var actualResult = expr.Evaluation;
 
             Assert.Equal(result, actualResult);
         }
