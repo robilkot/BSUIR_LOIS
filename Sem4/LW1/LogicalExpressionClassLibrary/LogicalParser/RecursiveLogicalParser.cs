@@ -90,7 +90,6 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     // Create object here to pass it as argument further. Child is set below
                     toReturn = new NegationNode(null);
 
-                    // todo: what if empty input after negation
                     var childFormula = BuildFormulaTree(input, ref i, toReturn);
 
                     toReturn.Left = childFormula;

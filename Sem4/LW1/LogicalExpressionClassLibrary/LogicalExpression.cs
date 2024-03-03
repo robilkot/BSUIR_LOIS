@@ -23,6 +23,15 @@ namespace LogicalExpressionClassLibrary
                 return new(_truthTable);
             }
         }
+        private int? _indexForm;
+        public int IndexForm
+        {
+            get
+            {
+                _indexForm ??= CalculateIndexForm();
+                return _indexForm.Value;
+            }
+        }
         public LogicalExpression(string input, AbstractLogicalParser logicalParser = null!)
         {
             // Set default parser or inject new one
@@ -30,7 +39,7 @@ namespace LogicalExpressionClassLibrary
 
             if (input.Length == 0)
             {
-                return;
+                throw new ArgumentException("Expression notation is empty");
             }
 
             (_root, _variables) = _logicalParser.Parse(input);
@@ -67,7 +76,6 @@ namespace LogicalExpressionClassLibrary
                 {
                     bits[i] = !bits[i];
 
-                    // If changed value was 0, no need update bits on left side from it
                     if (bits[i])
                     {
                         break;
@@ -105,7 +113,7 @@ namespace LogicalExpressionClassLibrary
             {
                 if (Debug)
                 {
-                    Console.WriteLine("\n[nxt] Next combination of values");
+                    Console.WriteLine("[nxt] Next combination of values");
                 }
 
                 int variableIndex = 0;
@@ -129,7 +137,7 @@ namespace LogicalExpressionClassLibrary
 
             if (Debug)
             {
-                Console.WriteLine("\n[nxt] Reverting to default values");
+                Console.WriteLine("[nxt] Reverting to default values");
             }
 
             foreach (var kv in initialVariablesState)
@@ -138,6 +146,36 @@ namespace LogicalExpressionClassLibrary
             }
 
             return truthTable;
+        }
+
+        public int CalculateIndexForm()
+        {
+            int indexForm = 0;
+
+            List<bool> bitList = [];
+            
+            foreach (var truthRow in TruthTable)
+            {
+                var expressionValue = truthRow[ToString()];
+                bitList.Add(expressionValue);
+            }
+
+            bitList.Reverse();
+
+            int twosPower = 0;
+
+            foreach (var bit in bitList)
+            {
+                indexForm += bit ? (int)Math.Pow(2, twosPower) : 0;
+                twosPower++;
+            }
+
+            if (Debug)
+            {
+                Console.WriteLine($"[idx] Index form: {Convert.ToString(indexForm, 2)}");
+            }
+
+            return indexForm;
         }
         public string ToTruthTableString()
         {
