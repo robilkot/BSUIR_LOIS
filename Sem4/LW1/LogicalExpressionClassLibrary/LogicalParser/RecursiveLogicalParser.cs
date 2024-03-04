@@ -62,11 +62,6 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                         throw new ArgumentException($"Unexpected variable '{variableName}' in expression notation");
                     }
 
-                    //if (_variables.TryGetValue(variableName, out var alreadyCreatedNode))
-                    //{
-                    //    toReturn = alreadyCreatedNode;
-                    //}
-                    //else
                     if (variableName.Length == 1 && Enum.IsDefined(typeof(LogicalSymbols), (int)variableName[0]))
                     {
                         toReturn = _constNodes[(LogicalSymbols)variableName[0]];
@@ -79,7 +74,8 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                         if (_variables.TryGetValue(variableName, out var alreadyCreatedList))
                         {
                             alreadyCreatedList.Add(atomicFormulaNode);
-                        } else
+                        }
+                        else
                         {
                             _variables.Add(variableName, [atomicFormulaNode]);
                         }
