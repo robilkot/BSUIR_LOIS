@@ -44,6 +44,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 
             return (root, new(_variables));
         }
+        
         private TreeNode BuildFormulaTree(string input, ref int i, TreeNode? parentNode)
         {
             TreeNode toReturn = null!;

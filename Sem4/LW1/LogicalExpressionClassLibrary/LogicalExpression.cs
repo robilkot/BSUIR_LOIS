@@ -17,8 +17,7 @@ namespace LogicalExpressionClassLibrary
             FDNF
         }
 
-        private AbstractLogicalParser _logicalParser = new RecursiveLogicalParser();
-        private Dictionary<string, List<AtomicFormulaNode>> _variables = [];
+        private readonly Dictionary<string, List<AtomicFormulaNode>> _variables = [];
         private TreeNode? _root;
 
         private List<Dictionary<string, bool>>? _truthTable;
@@ -40,17 +39,43 @@ namespace LogicalExpressionClassLibrary
             }
         }
         public bool Evaluation => _root!.Evaluation;
+        private LogicalExpression? _fdnf;
+        public LogicalExpression FDNF
+        {
+            get
+            {
+                if (_fdnf is null)
+                {
+                    _fdnf = BuildNormalForm(NormalForms.FDNF);
+                    _fdnf._fdnf = _fdnf;
+                }
+                return _fdnf;
+            }
+        }
+        private LogicalExpression? _fcnf;
+        public LogicalExpression FCNF
+        {
+            get
+            {
+                if (_fcnf is null)
+                {
+                    _fcnf = BuildNormalForm(NormalForms.FCNF);
+                    _fcnf._fcnf = _fcnf;
+                }
+                return _fcnf;
+            }
+        }
         public LogicalExpression(string input, AbstractLogicalParser logicalParser = null!)
         {
-            // Inject new parser if provided
-            _logicalParser = logicalParser is null ? _logicalParser : logicalParser;
-
             if (input.Length == 0)
             {
                 throw new ArgumentException("Expression notation is empty");
             }
 
-            (_root, _variables) = _logicalParser.Parse(input);
+            // Inject new parser if provided
+            logicalParser = logicalParser is null ? new RecursiveLogicalParser() : logicalParser;
+
+            (_root, _variables) = logicalParser.Parse(input);
         }
         private LogicalExpression() { }
         private TreeNode BuildNormalFormOperand(Dictionary<string, List<AtomicFormulaNode>> variables, Dictionary<string, bool> row, NormalForms strategy)
@@ -246,14 +271,15 @@ namespace LogicalExpressionClassLibrary
             }
 
             ProcessSubtree(currentNode!, out int lastNumericValue);
-            builder.Append(lastNumericValue).Append(") ");
-            builder.Append($"{(strategy == NormalForms.FDNF ? (char)LogicalSymbols.Disjunction : (char)LogicalSymbols.Conjunction)}");
+            builder.Append(lastNumericValue)
+                    .Append(") ")
+                    .Append($"{(strategy == NormalForms.FDNF ? (char)LogicalSymbols.Disjunction : (char)LogicalSymbols.Conjunction)}");
 
             return builder.ToString();
         }
         private int CalculateNumberForm()
         {
-            int indexForm = 0;
+            int numberForm = 0;
 
             List<bool> bitList = [];
 
@@ -269,16 +295,16 @@ namespace LogicalExpressionClassLibrary
 
             foreach (var bit in bitList)
             {
-                indexForm += bit ? (int)Math.Pow(2, twosPower) : 0;
+                numberForm += bit ? (int)Math.Pow(2, twosPower) : 0;
                 twosPower++;
             }
 
             if (Debug)
             {
-                Console.WriteLine($"[idx] Index form: {Convert.ToString(indexForm, 2)}");
+                Console.WriteLine($"[idx] Index form: {Convert.ToString(numberForm, 2)}");
             }
 
-            return indexForm;
+            return numberForm;
         }
         private LogicalExpression BuildNormalForm(NormalForms strategy)
         {
@@ -304,17 +330,13 @@ namespace LogicalExpressionClassLibrary
                 NormalForm._root = newRoot;
             }
 
+            if(NormalForm._root is null)
+            {
+                throw new InvalidOperationException($"Cannot build {strategy}");
+            }
+
             return NormalForm;
         }
-        public LogicalExpression ToFCNF()
-        {
-            return BuildNormalForm(NormalForms.FCNF);
-        }
-        public LogicalExpression ToFDNF()
-        {
-            return BuildNormalForm(NormalForms.FDNF);
-        }
-
         public bool GetVariable(string varName)
         {
             if (_variables!.TryGetValue(varName, out var variable) == true && variable.Count > 0)
@@ -334,11 +356,7 @@ namespace LogicalExpressionClassLibrary
             }
             else throw new ArgumentException($"Uninitialized variable '{varName}' addressed");
         }
-
-        public override string ToString()
-        {
-            return _root == null ? string.Empty : _root!.ToString()!;
-        }
+        public override string ToString() => _root?.ToString()!;
 
         [ExcludeFromCodeCoverage]
         public string ToTruthTableString()
@@ -359,26 +377,32 @@ namespace LogicalExpressionClassLibrary
             {
                 foreach (var kvp in truthRow)
                 {
-                    string v = kvp.Value ? "| 1 " : "| 0 ";
+                    string v = kvp.Value ? $"| {(char)LogicalSymbols.True} " : $"| {(char)LogicalSymbols.False} ";
 
                     builder.Append(v.PadRight(kvp.Key.Length + 3));
                 }
 
                 var expressionValue = truthRow[ToString()];
-                builder.AppendLine(expressionValue ? "|   1   |" : "|   0   |");
+                builder.AppendLine(expressionValue ? $"|   {(char)LogicalSymbols.True}   |" : $"|   {(char)LogicalSymbols.False}   |");
             }
 
             builder.Append(separator);
 
             return builder.ToString();
         }
-        public string ToFDNFNumericString()
+        public string ToFDNFNumericString() => BuildNormalFormNumericString(NormalForms.FDNF);
+        public string ToFCNFNumericString() => BuildNormalFormNumericString(NormalForms.FCNF);
+        public bool IsTautology()
         {
-            return BuildNormalFormNumericString(NormalForms.FDNF);
+            string currentExpressionNotation = ToString();
+
+            return !TruthTable.Any(row => row[currentExpressionNotation] == false);
         }
-        public string ToFCNFNumericString()
+        public bool ImpliesFrom(LogicalExpression source)
         {
-            return BuildNormalFormNumericString(NormalForms.FCNF);
+            LogicalExpression implication = new($"({source}→{this})");
+
+            return implication.IsTautology();
         }
     }
 }

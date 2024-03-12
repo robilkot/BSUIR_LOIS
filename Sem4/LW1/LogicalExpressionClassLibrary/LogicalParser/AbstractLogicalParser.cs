@@ -6,7 +6,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 {
     public abstract class AbstractLogicalParser
     {
-        protected static readonly Dictionary<LogicalSymbols, Func<TreeNode, TreeNode, TreeNode>> _binaryOperatorsNodes = new()
+        public static readonly Dictionary<LogicalSymbols, Func<TreeNode, TreeNode, TreeNode>> _binaryOperatorsNodes = new()
             {
                 { LogicalSymbols.Conjunction, (left, right) => new ConjunctionNode(left, right) },
                 { LogicalSymbols.Disjunction, (left, right) => new DisjunctionNode(left, right) },
