@@ -361,11 +361,13 @@ namespace LogicalExpressionClassLibrary
         [ExcludeFromCodeCoverage]
         public string ToTruthTableString()
         {
+            const int MaxColumnTitleWidth = 20;
+
             StringBuilder builder = new();
 
             foreach (var k in TruthTable[0].Keys)
             {
-                builder.Append($"| {k} ");
+                builder.Append($"| {k[..Math.Min(k.Length, MaxColumnTitleWidth)]} ");
             }
             builder.AppendLine("| Total |");
 
@@ -379,7 +381,7 @@ namespace LogicalExpressionClassLibrary
                 {
                     string v = kvp.Value ? $"| {(char)LogicalSymbols.True} " : $"| {(char)LogicalSymbols.False} ";
 
-                    builder.Append(v.PadRight(kvp.Key.Length + 3));
+                    builder.Append(v.PadRight(Math.Min(kvp.Key.Length, MaxColumnTitleWidth) + 3));
                 }
 
                 var expressionValue = truthRow[ToString()];

@@ -8,7 +8,9 @@
         RightBracket = ')',
         Equality = '~',
         Implication = '→',
+        //Implication = '>',
         Negation = '¬',
+        //Negation = '!',
         False = 'F',
         True = 'T',
     }

@@ -5,6 +5,22 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace LogicalExpressionUnitTest
 {
+    //"(A1&(A2|(¬(A3|(A4|A5)))))"
+    //"((A|B)&(¬C))"
+    //"((¬A)|(¬(B&C)))"
+    //"(A&(B&C))",
+    //"(A&(B|C))",
+    //"(A→(B→C))",
+    //"(B|C)",
+    //"((A1|(A2&A3))|B1)",
+    //"((A1|F)|T)",
+    //"((P|(Q&R))|S)",
+    //"((A1|(&A3))|B1)",
+
+    // pz 2
+    // "(((!P)>P)>(R|Q))"
+    // "((((P>R)&(Q>S))&((!P)|(!S)))>((!P)|(!Q)))"
+
     [ExcludeFromCodeCoverage]
     public class LogicalExpressionUnitTest
     {
