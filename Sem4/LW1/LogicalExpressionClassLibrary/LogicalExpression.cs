@@ -2,23 +2,32 @@
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using LogicalExpressionClassLibrary.LogicalParser;
+using LogicalExpressionClassLibrary.Minimization.Strategy;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace LogicalExpressionClassLibrary
 {
-    public sealed class LogicalExpression
+    public sealed partial class LogicalExpression
     {
         public static bool Debug = false;
-        private enum NormalForms
-        {
-            FCNF,
-            FDNF
-        }
 
         private readonly Dictionary<string, List<AtomicFormulaNode>> _variables = [];
+        public int VariablesCount => _variables.Count;
         private TreeNode? _root;
+        public TreeNode? Root { get { return _root; }
+            set
+            {
+                //if(_root is not null)
+                //{
+                //    throw new Exception("Can't change existing expression root");
+                //} else
+                {
+                    _root = value;
+                }
+            }
+        }
 
         private List<Dictionary<string, bool>>? _truthTable;
         public List<Dictionary<string, bool>> TruthTable
@@ -78,6 +87,7 @@ namespace LogicalExpressionClassLibrary
             (_root, _variables) = logicalParser.Parse(input);
         }
         private LogicalExpression() { }
+        public static LogicalExpression Empty { get => new(); }
         private TreeNode BuildNormalFormOperand(Dictionary<string, List<AtomicFormulaNode>> variables, Dictionary<string, bool> row, NormalForms strategy)
         {
             TreeNode? root = null;
@@ -219,7 +229,7 @@ namespace LogicalExpressionClassLibrary
 
             return truthTable;
         }
-        private string BuildNormalFormNumericString(NormalForms strategy)
+        public string ToNFNumericString(NormalForms strategy)
         {
             void ProcessSubtree(TreeNode root, out int numericValue)
             {
@@ -254,7 +264,7 @@ namespace LogicalExpressionClassLibrary
             builder.Append('(');
 
             var currentNode = _root;
-            
+
             Type targetType = strategy switch
             {
                 NormalForms.FDNF => typeof(DisjunctionNode),
@@ -276,6 +286,12 @@ namespace LogicalExpressionClassLibrary
                     .Append($"{(strategy == NormalForms.FDNF ? (char)LogicalSymbols.Disjunction : (char)LogicalSymbols.Conjunction)}");
 
             return builder.ToString();
+        }
+        public LogicalExpression Minimize(NormalForms normalForm, IMinimizeStrategy strategy = null!)
+        {
+            strategy ??= new EvaluationMinimizeStrategy();
+
+            return strategy.Minimize(this, normalForm);
         }
         private int CalculateNumberForm()
         {
@@ -330,7 +346,7 @@ namespace LogicalExpressionClassLibrary
                 NormalForm._root = newRoot;
             }
 
-            if(NormalForm._root is null)
+            if (NormalForm._root is null)
             {
                 throw new InvalidOperationException($"Cannot build {strategy}");
             }
@@ -392,8 +408,6 @@ namespace LogicalExpressionClassLibrary
 
             return builder.ToString();
         }
-        public string ToFDNFNumericString() => BuildNormalFormNumericString(NormalForms.FDNF);
-        public string ToFCNFNumericString() => BuildNormalFormNumericString(NormalForms.FCNF);
         public bool IsTautology()
         {
             string currentExpressionNotation = ToString();

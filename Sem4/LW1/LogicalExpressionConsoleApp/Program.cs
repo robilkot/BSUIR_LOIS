@@ -1,5 +1,6 @@
 ﻿using LogicalExpressionClassLibrary;
 using LogicalExpressionClassLibrary.LogicalExpressionTree;
+using LogicalExpressionClassLibrary.Minimization;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,6 +9,8 @@ using System.Diagnostics.CodeAnalysis;
 //TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
 
 List<string> TestCases = [
+    "( ((¬A)&((¬B)&C)) | (((¬A)&B)&C) | ((¬A)&(B&(¬C))) | (A&(B&(¬C))) )",
+    "( ((¬A)&((B)&(C))) | ((A)&((¬B)&(¬C))) | ((A)&((¬B)&(C))) | ((A)&((B)&(¬C))) | ((A)&((B)&(C))) )",
     "(A&B)",
     "(A)",
     "(A&(B|C))",
@@ -69,6 +72,17 @@ void CheckKnowledge()
     if (correctAnswer == userAnswer) Console.WriteLine("\nCorrect!");
     else Console.WriteLine("\nIncorrect!");
 }
+
+LogicalExpression expr = new(TestCases[0]);
+
+var form = NormalForms.FDNF;
+
+Console.WriteLine(expr.ToString());
+
+var x = expr.Minimize(form);
+Console.WriteLine(x.ToString());
+
+return;
 
 while (true)
 {

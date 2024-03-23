@@ -145,6 +145,10 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                         break;
                     }
                 }
+                else if (input[i] == ' ')
+                {
+                    continue;
+                }
                 else
                 {
                     throw new ArgumentException($"Unexpected token '{input[i]}' in expression notation");

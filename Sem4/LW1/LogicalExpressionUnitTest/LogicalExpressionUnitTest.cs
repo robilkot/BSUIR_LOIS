@@ -76,7 +76,7 @@ namespace LogicalExpressionUnitTest
             TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
             LogicalExpression expr = new(input);
 
-            var FCNF = expr.FCNF.ToFCNFNumericString();
+            var FCNF = expr.FCNF.ToNFNumericString(NormalForms.FCNF);
 
             Assert.Equal(expected, FCNF);
         }
@@ -89,7 +89,7 @@ namespace LogicalExpressionUnitTest
             TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
             LogicalExpression expr = new(input);
 
-            var FDNF = expr.FDNF.ToFDNFNumericString();
+            var FDNF = expr.FDNF.ToNFNumericString(NormalForms.FDNF);
 
             Assert.Equal(expected, FDNF);
         }
