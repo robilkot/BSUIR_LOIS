@@ -2,7 +2,6 @@
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using LogicalExpressionClassLibrary.LogicalParser;
-using LogicalExpressionClassLibrary.Minimization.Strategy;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -11,18 +10,19 @@ namespace LogicalExpressionClassLibrary
 {
     public sealed partial class LogicalExpression
     {
-        public static bool Debug = false;
-
         private readonly Dictionary<string, List<AtomicFormulaNode>> _variables = [];
-        public int VariablesCount => _variables.Count;
+        public Dictionary<string, List<AtomicFormulaNode>> Variables => _variables;
         private TreeNode? _root;
-        public TreeNode? Root { get { return _root; }
+        public TreeNode? Root
+        {
+            get { return _root; }
             set
             {
-                //if(_root is not null)
-                //{
-                //    throw new Exception("Can't change existing expression root");
-                //} else
+                if (_root is not null)
+                {
+                    throw new Exception("Can't change existing expression root");
+                }
+                else
                 {
                     _root = value;
                 }
@@ -78,6 +78,7 @@ namespace LogicalExpressionClassLibrary
         {
             if (input.Length == 0)
             {
+                ConsoleLogger.Log($"Expression notation is empty", ConsoleLogger.DebugLevels.Error);
                 throw new ArgumentException("Expression notation is empty");
             }
 
@@ -131,7 +132,7 @@ namespace LogicalExpressionClassLibrary
                     {
                         NormalForms.FDNF => new ConjunctionNode(root, toAppend),
                         NormalForms.FCNF => new DisjunctionNode(root, toAppend),
-                        _ => throw new ArgumentException("Invalid strategy specified"),
+                        _ => throw new NotImplementedException()
                     };
                     toAppend.Parent = newRoot;
                     root.Parent = newRoot;
@@ -185,10 +186,7 @@ namespace LogicalExpressionClassLibrary
 
             do
             {
-                if (Debug)
-                {
-                    Console.WriteLine("[nxt] Next combination of values");
-                }
+                ConsoleLogger.Log("Next combination of values", ConsoleLogger.DebugLevels.Debug);
 
                 int variableIndex = 0;
 
@@ -212,10 +210,7 @@ namespace LogicalExpressionClassLibrary
             }
             while (variablesTruthMask.HasAnySet());
 
-            if (Debug)
-            {
-                Console.WriteLine("[nxt] Reverting to default values");
-            }
+            ConsoleLogger.Log("Reverting to default values", ConsoleLogger.DebugLevels.Debug);
 
             foreach (var kv in initialVariablesState)
             {
@@ -240,7 +235,7 @@ namespace LogicalExpressionClassLibrary
                 {
                     NormalForms.FDNF => typeof(ConjunctionNode),
                     NormalForms.FCNF => typeof(DisjunctionNode),
-                    _ => throw new ArgumentException("Invalid strategy specified"),
+                    _ => throw new NotImplementedException()
                 };
                 while (root.GetType() == targetType)
                 {
@@ -269,7 +264,7 @@ namespace LogicalExpressionClassLibrary
             {
                 NormalForms.FDNF => typeof(DisjunctionNode),
                 NormalForms.FCNF => typeof(ConjunctionNode),
-                _ => throw new ArgumentException("Invalid strategy specified"),
+                _ => throw new NotImplementedException()
             };
             while (currentNode!.GetType() == targetType)
             {
@@ -286,12 +281,6 @@ namespace LogicalExpressionClassLibrary
                     .Append($"{(strategy == NormalForms.FDNF ? (char)LogicalSymbols.Disjunction : (char)LogicalSymbols.Conjunction)}");
 
             return builder.ToString();
-        }
-        public LogicalExpression Minimize(NormalForms normalForm, IMinimizeStrategy strategy = null!)
-        {
-            strategy ??= new EvaluationMinimizeStrategy();
-
-            return strategy.Minimize(this, normalForm);
         }
         private int CalculateNumberForm()
         {
@@ -315,10 +304,7 @@ namespace LogicalExpressionClassLibrary
                 twosPower++;
             }
 
-            if (Debug)
-            {
-                Console.WriteLine($"[idx] Index form: {Convert.ToString(numberForm, 2)}");
-            }
+            ConsoleLogger.Log($"Index form: {Convert.ToString(numberForm, 2)}", ConsoleLogger.DebugLevels.Info);
 
             return numberForm;
         }
@@ -336,7 +322,7 @@ namespace LogicalExpressionClassLibrary
                     null => newOperand,
                     not null when strategy == NormalForms.FCNF => new ConjunctionNode(NormalForm._root, newOperand),
                     not null when strategy == NormalForms.FDNF => new DisjunctionNode(NormalForm._root, newOperand),
-                    _ => throw new ArgumentException("Invalid strategy specified"),
+                    _ => throw new NotImplementedException()
                 };
 
                 if (NormalForm._root is not null)
@@ -348,6 +334,7 @@ namespace LogicalExpressionClassLibrary
 
             if (NormalForm._root is null)
             {
+                ConsoleLogger.Log($"Cannot build {strategy}", ConsoleLogger.DebugLevels.Error);
                 throw new InvalidOperationException($"Cannot build {strategy}");
             }
 

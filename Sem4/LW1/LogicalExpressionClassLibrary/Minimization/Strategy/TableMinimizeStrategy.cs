@@ -2,7 +2,7 @@
 
 namespace LogicalExpressionClassLibrary.Minimization.Strategy
 {
-    public class TableMinimizeStrategy : IMinimizeStrategy
+    public class TableMinimizeStrategy : IMinimizationStrategy
     {
         public LogicalExpression Minimize(LogicalExpression input, NormalForms form)
         {

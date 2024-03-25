@@ -10,6 +10,7 @@
             {
                 if (!ValidateName(value))
                 {
+                    ConsoleLogger.Log($"Invalid atomic formula", ConsoleLogger.DebugLevels.Error);
                     throw new ArgumentException("Invalid atomic formula");
                 }
 
@@ -24,10 +25,7 @@
             get => _value;
             set
             {
-                if ((DebugLevel & DebugLevels.Set) != 0)
-                {
-                    Console.WriteLine($"[set] {Name} {value}");
-                }
+                ConsoleLogger.Log($"Set {Name} to {value}", ConsoleLogger.DebugLevels.Debug);
 
                 if (_value != value)
                 {

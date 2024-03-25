@@ -2,13 +2,6 @@
 {
     public abstract class TreeNode
     {
-        [Flags] public enum DebugLevels 
-        {
-            Clear = 0,
-            Eval = 1,
-            Set = 2
-        }
-        public static DebugLevels DebugLevel = 0;
         private TreeNode? _right = null;
         public TreeNode? Right
         {
@@ -40,7 +33,7 @@
                 {
                     _evaluation = Evaluate();
 
-                    if ((DebugLevel & DebugLevels.Eval) != 0) Console.WriteLine($"[evl] {ToString()}"); // - {GetType().Name}");
+                    ConsoleLogger.Log($"Evaluate {ToString()}", ConsoleLogger.DebugLevels.Debug);
                 }
                 return _evaluation.Value;
             }
@@ -55,19 +48,8 @@
         {
             if (_evaluation != null)
             {
-                if ((DebugLevel & DebugLevels.Clear) != 0)
-                {
-                    Console.Write($"[clr] {GetType().Name}");
-
-                    if (Parent != null)
-                    {
-                        Console.Write($" with parent {Parent}\n");
-                    }
-                    else
-                    {
-                        Console.WriteLine();
-                    }
-                }
+                string logStringAddition = Parent is null ? string.Empty : $" with parent {Parent}";
+                ConsoleLogger.Log($"Clear value of {GetType().Name}" + logStringAddition, ConsoleLogger.DebugLevels.Debug);
 
                 _evaluation = null;
                 // If value is outdated then upper tree part is also outdated

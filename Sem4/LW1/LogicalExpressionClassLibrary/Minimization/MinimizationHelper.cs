@@ -5,6 +5,43 @@ namespace LogicalExpressionClassLibrary.Minimization
 {
     public static class MinimizationHelper
     {
+        public static Dictionary<string, bool> VariablesInvertion(TreeNode constituent, NormalForms form)
+        {
+            Dictionary<string, bool> result = [];
+
+            var currentNode = constituent;
+
+            Type targetType = form switch
+            {
+                NormalForms.FDNF => typeof(ConjunctionNode),
+                NormalForms.FCNF => typeof(DisjunctionNode),
+                _ => throw new NotImplementedException(),
+            };
+            while (currentNode!.GetType() == targetType)
+            {
+                if (currentNode.Right is NegationNode)
+                {
+                    result.Add(currentNode.Right!.Left!.ToString()!, false);
+                }
+                else
+                {
+                    result.Add(currentNode.Right!.ToString()!, true);
+                }
+
+                currentNode = currentNode.Left;
+            }
+
+            if (currentNode is NegationNode)
+            {
+                result.Add(currentNode.Left!.ToString()!, false);
+            }
+            else
+            {
+                result.Add(currentNode.ToString()!, true);
+            }
+
+            return result;
+        }
         public static List<TreeNode> GetConstituents(LogicalExpression input, NormalForms form)
         {
             List<TreeNode> constituents = [];
@@ -27,7 +64,7 @@ namespace LogicalExpressionClassLibrary.Minimization
 
             return constituents;
         }
-        private static LogicalExpression BuildNFFromStringSet(HashSet<string> mergedConstituents, NormalForms form)
+        public static LogicalExpression BuildNFFromStringSet(HashSet<string> mergedConstituents, NormalForms form)
         {
             LogicalExpression result = LogicalExpression.Empty;
 
@@ -44,6 +81,23 @@ namespace LogicalExpressionClassLibrary.Minimization
             foreach (var constituent in mergedConstituents)
             {
                 LogicalExpression node = new(constituent);
+
+                foreach(var variable in node.Variables)
+                {
+                    if(result.Variables.TryGetValue(variable.Key, out var existingValue))
+                    {
+                        foreach(var newNode in variable.Value)
+                        {
+                            if(!existingValue.Contains(newNode))
+                            {
+                                existingValue.Add(newNode);
+                            }
+                        }
+                    } else
+                    {
+                        result.Variables.Add(variable.Key, variable.Value);
+                    }
+                }
 
                 if (root is null)
                 {
@@ -75,44 +129,6 @@ namespace LogicalExpressionClassLibrary.Minimization
         }
         public static LogicalExpression MergeConstituents(this LogicalExpression input, NormalForms form)
         {
-            Dictionary<string, bool> variablesAreInvertedDict(TreeNode constituent)
-            {
-                Dictionary<string, bool> result = [];
-
-                var currentNode = constituent;
-
-                Type targetType = form switch
-                {
-                    NormalForms.FDNF => typeof(ConjunctionNode),
-                    NormalForms.FCNF => typeof(DisjunctionNode),
-                    _ => throw new NotImplementedException(),
-                };
-                while (currentNode!.GetType() == targetType)
-                {
-                    if (currentNode.Right is NegationNode)
-                    {
-                        result.Add(currentNode.Right!.Left!.ToString()!, true);
-                    }
-                    else
-                    {
-                        result.Add(currentNode.Right!.ToString()!, false);
-                    }
-
-                    currentNode = currentNode.Left;
-                }
-
-                if (currentNode is NegationNode)
-                {
-                    result.Add(currentNode.Left!.ToString()!, true);
-                }
-                else
-                {
-                    result.Add(currentNode.ToString()!, false);
-                }
-
-                return result;
-            }
-
             List<(TreeNode, TreeNode)> formPairs(List<TreeNode> constituents)
             {
                 List<(TreeNode, TreeNode)> pairs = [];
@@ -136,8 +152,7 @@ namespace LogicalExpressionClassLibrary.Minimization
                 return pairs;
             }
 
-
-            for (int identicalVariablesCount = input.VariablesCount - 1; identicalVariablesCount > 0; identicalVariablesCount--)
+            for (int identicalVariablesCount = input.Variables.Count - 1; identicalVariablesCount > 0; identicalVariablesCount--)
             {
                 var constituents = GetConstituents(input, form);
 
@@ -148,8 +163,8 @@ namespace LogicalExpressionClassLibrary.Minimization
 
                 foreach (var pair in pairs)
                 {
-                    var variables1 = variablesAreInvertedDict(pair.Item1);
-                    var variables2 = variablesAreInvertedDict(pair.Item2);
+                    var variables1 = VariablesInvertion(pair.Item1, form);
+                    var variables2 = VariablesInvertion(pair.Item2, form);
 
                     // Continue if trying to merge two different sized constituents
                     if (variables1.Count != variables2.Count) continue;
@@ -190,16 +205,15 @@ namespace LogicalExpressionClassLibrary.Minimization
 
                     if (variables1[differentVariable!])
                     {
+                        substringToSearch = differentVariable!;
+                    }
+                    else
+                    {
                         substringToSearch =
-                            // todo: hack to output char
                             ((char)LogicalSymbols.LeftBracket).ToString() +
                             (char)LogicalSymbols.Negation +
                             differentVariable +
                             (char)LogicalSymbols.RightBracket;
-                    }
-                    else
-                    {
-                        substringToSearch = differentVariable!;
                     }
 
                     var item1String = pair.Item1.ToString();
@@ -228,10 +242,7 @@ namespace LogicalExpressionClassLibrary.Minimization
                     yetNotProcessedConstituents.Remove(pair.Item1.ToString()!);
                     yetNotProcessedConstituents.Remove(pair.Item2.ToString()!);
 
-                    Console.WriteLine(
-                        "Merged " + pair.Item1.ToString() +
-                        " and " + pair.Item2.ToString() +
-                        " to " + pairToAdd.ToString());
+                    ConsoleLogger.Log($"Merged {pair.Item1} and {pair.Item2} to {pairToAdd}", ConsoleLogger.DebugLevels.Info);
                 }
                 foreach (var constituent in yetNotProcessedConstituents)
                 {
@@ -240,6 +251,8 @@ namespace LogicalExpressionClassLibrary.Minimization
 
                 input = BuildNFFromStringSet(mergedConstituents, form);
             }
+
+            ConsoleLogger.Log($"Expression after merging: {input}", ConsoleLogger.DebugLevels.Info);
 
             return input;
         }
