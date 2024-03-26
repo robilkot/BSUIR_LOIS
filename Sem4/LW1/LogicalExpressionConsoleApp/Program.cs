@@ -12,10 +12,10 @@ List<string> TestCases = [
     "(A)",
     "(A&(B|C))",
     "(B&C)",
-    "(A→(B~C))",
-    "((¬B)&C)",
-    "((¬A)|C)",
-    "((B→A)~C)",
+    $"(A{(char)LogicalSymbols.Implication}(B~C))",
+    $"(({(char)LogicalSymbols.Negation}B)&C)",
+    $"(({(char)LogicalSymbols.Negation}A)|C)",
+    $"((B{(char)LogicalSymbols.Implication}A)~C)",
 ];
 
 void InputExpression(out LogicalExpression expr)

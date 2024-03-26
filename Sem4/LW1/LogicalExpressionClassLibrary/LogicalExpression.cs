@@ -402,7 +402,7 @@ namespace LogicalExpressionClassLibrary
         }
         public bool ImpliesFrom(LogicalExpression source)
         {
-            LogicalExpression implication = new($"({source}→{this})");
+            LogicalExpression implication = new($"({source}{(char)LogicalSymbols.Implication}{this})");
 
             return implication.IsTautology();
         }
