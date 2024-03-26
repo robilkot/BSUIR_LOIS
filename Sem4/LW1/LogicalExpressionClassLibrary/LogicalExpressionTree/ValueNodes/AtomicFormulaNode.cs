@@ -24,11 +24,8 @@
             get => _value;
             set
             {
-                if ((DebugLevel & DebugLevels.Set) != 0)
-                {
-                    Console.WriteLine($"[set] {Name} {value}");
-                }
-
+                ConsoleLogger.Log($"Set {Name} to {value}", ConsoleLogger.DebugLevels.Debug);
+                
                 if (_value != value)
                 {
                     ClearEvaluation();
@@ -40,10 +37,6 @@
         public AtomicFormulaNode(string name) : base(null, null)
         {
             Name = name;
-        }
-        public AtomicFormulaNode(AtomicFormulaNode other) : base(null, null)
-        {
-            _name = other._name;
         }
         protected override bool Evaluate() => Value;
 

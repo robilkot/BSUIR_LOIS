@@ -14,7 +14,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 { LogicalSymbols.Equality,    (left, right) => new EqualityNode(left, right) },
             };
 
-        protected static readonly Dictionary<LogicalSymbols, TreeNode> _constNodes = new()
+        public static readonly Dictionary<LogicalSymbols, TreeNode> _constNodes = new()
             {
                 { LogicalSymbols.True, TrueNode.GetInstance() },
                 { LogicalSymbols.False, FalseNode.GetInstance() },

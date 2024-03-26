@@ -10,13 +10,6 @@ namespace LogicalExpressionClassLibrary
 {
     public sealed class LogicalExpression
     {
-        public static bool Debug = false;
-        private enum NormalForms
-        {
-            FCNF,
-            FDNF
-        }
-
         private readonly Dictionary<string, List<AtomicFormulaNode>> _variables = [];
         private TreeNode? _root;
 
@@ -29,42 +22,7 @@ namespace LogicalExpressionClassLibrary
                 return new(_truthTable);
             }
         }
-        private int? _numberForm;
-        public int NumberForm
-        {
-            get
-            {
-                _numberForm ??= CalculateNumberForm();
-                return _numberForm.Value;
-            }
-        }
         public bool Evaluation => _root!.Evaluation;
-        private LogicalExpression? _fdnf;
-        public LogicalExpression FDNF
-        {
-            get
-            {
-                if (_fdnf is null)
-                {
-                    _fdnf = BuildNormalForm(NormalForms.FDNF);
-                    _fdnf._fdnf = _fdnf;
-                }
-                return _fdnf;
-            }
-        }
-        private LogicalExpression? _fcnf;
-        public LogicalExpression FCNF
-        {
-            get
-            {
-                if (_fcnf is null)
-                {
-                    _fcnf = BuildNormalForm(NormalForms.FCNF);
-                    _fcnf._fcnf = _fcnf;
-                }
-                return _fcnf;
-            }
-        }
         public LogicalExpression(string input, AbstractLogicalParser logicalParser = null!)
         {
             if (input.Length == 0)
@@ -78,60 +36,6 @@ namespace LogicalExpressionClassLibrary
             (_root, _variables) = logicalParser.Parse(input);
         }
         private LogicalExpression() { }
-        private TreeNode BuildNormalFormOperand(Dictionary<string, List<AtomicFormulaNode>> variables, Dictionary<string, bool> row, NormalForms strategy)
-        {
-            TreeNode? root = null;
-
-            foreach (var variable in _variables!)
-            {
-                var atomicFormulaNode = new AtomicFormulaNode(variable.Value[0]);
-
-                string atomicFormulaNodeString = atomicFormulaNode.ToString();
-
-                if (variables.TryGetValue(atomicFormulaNodeString, out var list))
-                {
-                    list.Add(atomicFormulaNode);
-                }
-                else
-                {
-                    variables.Add(atomicFormulaNodeString, [atomicFormulaNode]);
-                }
-
-                TreeNode toAppend = null!;
-
-                // Invert logic if calculating FCNF
-                if (row[variable.Key] ^ (strategy == NormalForms.FCNF))
-                {
-                    toAppend = atomicFormulaNode;
-                }
-                else
-                {
-                    var negationNode = new NegationNode(atomicFormulaNode);
-                    atomicFormulaNode.Parent = negationNode;
-                    toAppend = negationNode;
-                }
-
-                if (root is null)
-                {
-                    root = toAppend;
-                }
-                else
-                {
-                    TreeNode newRoot = strategy switch
-                    {
-                        NormalForms.FDNF => new ConjunctionNode(root, toAppend),
-                        NormalForms.FCNF => new DisjunctionNode(root, toAppend),
-                        _ => throw new ArgumentException("Invalid strategy specified"),
-                    };
-                    toAppend.Parent = newRoot;
-                    root.Parent = newRoot;
-                    root = newRoot;
-                }
-            }
-
-            return root!;
-
-        }
         private List<Dictionary<string, bool>> BuildTruthTable()
         {
             static void NextCombination(BitArray bits)
@@ -175,10 +79,7 @@ namespace LogicalExpressionClassLibrary
 
             do
             {
-                if (Debug)
-                {
-                    Console.WriteLine("[nxt] Next combination of values");
-                }
+                ConsoleLogger.Log("Next combination of values", ConsoleLogger.DebugLevels.Debug);
 
                 int variableIndex = 0;
 
@@ -202,10 +103,7 @@ namespace LogicalExpressionClassLibrary
             }
             while (variablesTruthMask.HasAnySet());
 
-            if (Debug)
-            {
-                Console.WriteLine("[nxt] Reverting to default values");
-            }
+            ConsoleLogger.Log("Reverting to default values", ConsoleLogger.DebugLevels.Debug);
 
             foreach (var kv in initialVariablesState)
             {
@@ -218,124 +116,6 @@ namespace LogicalExpressionClassLibrary
             }
 
             return truthTable;
-        }
-        private string BuildNormalFormNumericString(NormalForms strategy)
-        {
-            void ProcessSubtree(TreeNode root, out int numericValue)
-            {
-                numericValue = 0;
-                int twosPower = 0;
-
-                Type targetType = strategy switch
-                {
-                    NormalForms.FDNF => typeof(ConjunctionNode),
-                    NormalForms.FCNF => typeof(DisjunctionNode),
-                    _ => throw new ArgumentException("Invalid strategy specified"),
-                };
-                while (root.GetType() == targetType)
-                {
-                    if (root.Right is AtomicFormulaNode ^ strategy == NormalForms.FCNF)
-                    {
-                        numericValue += (int)Math.Pow(2, twosPower);
-                    }
-                    twosPower++;
-
-                    root = root.Left!;
-                }
-
-                // Last variable is a left leaf, not right
-                if (root is AtomicFormulaNode ^ strategy == NormalForms.FCNF)
-                {
-                    numericValue += (int)Math.Pow(2, twosPower);
-                }
-            }
-
-            StringBuilder builder = new();
-            builder.Append('(');
-
-            var currentNode = _root;
-            
-            Type targetType = strategy switch
-            {
-                NormalForms.FDNF => typeof(DisjunctionNode),
-                NormalForms.FCNF => typeof(ConjunctionNode),
-                _ => throw new ArgumentException("Invalid strategy specified"),
-            };
-            while (currentNode!.GetType() == targetType)
-            {
-                ProcessSubtree(currentNode.Right!, out int numericValue);
-
-                builder.Append(numericValue).Append(", ");
-
-                currentNode = currentNode.Left;
-            }
-
-            ProcessSubtree(currentNode!, out int lastNumericValue);
-            builder.Append(lastNumericValue)
-                    .Append(") ")
-                    .Append($"{(strategy == NormalForms.FDNF ? (char)LogicalSymbols.Disjunction : (char)LogicalSymbols.Conjunction)}");
-
-            return builder.ToString();
-        }
-        private int CalculateNumberForm()
-        {
-            int numberForm = 0;
-
-            List<bool> bitList = [];
-
-            foreach (var truthRow in TruthTable)
-            {
-                var expressionValue = truthRow[ToString()];
-                bitList.Add(expressionValue);
-            }
-
-            bitList.Reverse();
-
-            int twosPower = 0;
-
-            foreach (var bit in bitList)
-            {
-                numberForm += bit ? (int)Math.Pow(2, twosPower) : 0;
-                twosPower++;
-            }
-
-            if (Debug)
-            {
-                Console.WriteLine($"[idx] Index form: {Convert.ToString(numberForm, 2)}");
-            }
-
-            return numberForm;
-        }
-        private LogicalExpression BuildNormalForm(NormalForms strategy)
-        {
-            LogicalExpression NormalForm = new();
-
-            foreach (var truthRow in TruthTable.Where(r => r[ToString()] ^ strategy == NormalForms.FCNF))
-            {
-                var newOperand = BuildNormalFormOperand(NormalForm._variables, truthRow, strategy);
-
-                // Append new operand to already built tree
-                TreeNode newRoot = NormalForm._root switch
-                {
-                    null => newOperand,
-                    not null when strategy == NormalForms.FCNF => new ConjunctionNode(NormalForm._root, newOperand),
-                    not null when strategy == NormalForms.FDNF => new DisjunctionNode(NormalForm._root, newOperand),
-                    _ => throw new ArgumentException("Invalid strategy specified"),
-                };
-
-                if (NormalForm._root is not null)
-                {
-                    NormalForm._root!.Parent = newRoot;
-                }
-                NormalForm._root = newRoot;
-            }
-
-            if(NormalForm._root is null)
-            {
-                throw new InvalidOperationException($"Cannot build {strategy}");
-            }
-
-            return NormalForm;
         }
         public bool GetVariable(string varName)
         {
@@ -392,8 +172,6 @@ namespace LogicalExpressionClassLibrary
 
             return builder.ToString();
         }
-        public string ToFDNFNumericString() => BuildNormalFormNumericString(NormalForms.FDNF);
-        public string ToFCNFNumericString() => BuildNormalFormNumericString(NormalForms.FCNF);
         public bool IsTautology()
         {
             string currentExpressionNotation = ToString();

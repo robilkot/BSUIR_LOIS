@@ -1,11 +1,11 @@
 ﻿using LogicalExpressionClassLibrary;
-using LogicalExpressionClassLibrary.LogicalExpressionTree;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-
-//LogicalExpression.Debug = true;
-//TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+//ConsoleLogger.DebugLevel = 
+//    ConsoleLogger.DebugLevels.Info 
+//    | ConsoleLogger.DebugLevels.Debug
+//    | ConsoleLogger.DebugLevels.Error
+//    | ConsoleLogger.DebugLevels.Warning;
 
 List<string> TestCases = [
     "(A&B)",
@@ -60,14 +60,19 @@ void CheckKnowledge()
 
     bool correctAnswer = expr1.ImpliesFrom(expr2);
 
-    Console.WriteLine($"First expression: {expr1}");
-    Console.WriteLine($"Second expression: {expr2}");
+    Console.WriteLine($"First formula:\t {expr1}");
+    Console.WriteLine($"Second formula:\t {expr2}");
     Console.WriteLine("Does second expression imply from first one? Y/N");
     char userKeyInput = Console.ReadKey().KeyChar;
     bool userAnswer = userKeyInput == 'Y' || userKeyInput == 'y';
 
     if (correctAnswer == userAnswer) Console.WriteLine("\nCorrect!");
-    else Console.WriteLine("\nIncorrect!");
+    else
+    {
+        Console.WriteLine("\nIncorrect! Compare truth tables to find out why:");
+        Console.WriteLine(expr1.ToTruthTableString());
+        Console.WriteLine(expr2.ToTruthTableString());
+    };
 }
 
 while (true)
