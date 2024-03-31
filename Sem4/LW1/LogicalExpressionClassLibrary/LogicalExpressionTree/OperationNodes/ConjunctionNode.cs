@@ -1,4 +1,17 @@
-﻿namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
+﻿//
+// Лабораторная работа №1 по дисциплине "Логические основы интеллектуальных систем"
+// Выполнили студенты группы 221701 БГУИР:
+// - Робилко Тимур Маркович
+// - Абушкевич Алексей Александрович
+// 
+// Класс узла синтаксического дерева для представления оператора "Конъюнкция" логики высказываний
+// 27.02.2024
+//
+// Источники:
+// - Основы Алгоритмизации и Программирования (2 семестр). Практикум
+//
+
+namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
     public sealed class ConjunctionNode(TreeNode? left, TreeNode? right) : TreeNode(left, right)
     {

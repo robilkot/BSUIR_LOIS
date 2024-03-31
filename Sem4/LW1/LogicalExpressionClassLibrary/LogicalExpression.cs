@@ -1,4 +1,17 @@
-﻿using LogicalExpressionClassLibrary.LogicalExpressionTree;
+﻿//
+// Лабораторная работа №1 по дисциплине "Логические основы интеллектуальных систем"
+// Выполнили студенты группы 221701 БГУИР:
+// - Робилко Тимур Маркович
+// - Абушкевич Алексей Александрович
+// 
+// Класс, отвечающий за представление логического выражения в памяти компьютера
+// 27.03.2024
+//
+// Источники:
+// - Основы Алгоритмизации и Программирования (2 семестр). Практикум
+//
+
+using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using LogicalExpressionClassLibrary.LogicalParser;

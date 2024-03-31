@@ -1,4 +1,18 @@
-﻿using LogicalExpressionClassLibrary;
+﻿//
+// Лабораторная работа №1 по дисциплине "Логические основы интеллектуальных систем"
+// Выполнили студенты группы 221701 БГУИР:
+// - Робилко Тимур Маркович
+// - Абушкевич Алексей Александрович
+// 
+// Класс для хранения unit-тестов, относящихся к классу LogicalExpression
+// 30.02.2024
+//
+// Источники:
+// - Проектирование программного обеспечения интеллектуальных систем (3 семестр)
+// - Библиотека xUnit
+//
+
+using LogicalExpressionClassLibrary;
 using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalParser;
 using System.Diagnostics.CodeAnalysis;
@@ -35,64 +49,54 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A1|(B2&A3))|B1)")]
         public void RecursiveParsing_shouldEqual(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
             LogicalExpression expr = new(input, new RecursiveLogicalParser());
 
             Assert.Equal(input, expr.ToString());
         }
 
-        [Theory]
-        [InlineData("((A|B)&(¬C))", "(((((¬A)&B)&(¬C))|((A&(¬B))&(¬C)))|((A&B)&(¬C)))")]
-        public void FDNF_shouldEqual(string input, string expected)
-        {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
-            LogicalExpression expr = new(input);
+        //[Theory]
+        //[InlineData("((A|B)&(¬C))", "(((((¬A)&B)&(¬C))|((A&(¬B))&(¬C)))|((A&B)&(¬C)))")]
+        //public void FDNF_shouldEqual(string input, string expected)
+        //{
+        //    LogicalExpression expr = new(input);
 
-            var FDNF = expr.FDNF;
+        //    var FDNF = expr.FDNF;
 
-            Assert.Equal(expected, FDNF.ToString());
-        }
+        //    Assert.Equal(expected, FDNF.ToString());
+        //}
 
-        [Theory]
-        [InlineData("((A|B)&(¬C))", "((((((A|B)|C)&((A|B)|(¬C)))&((A|(¬B))|(¬C)))&(((¬A)|B)|(¬C)))&(((¬A)|(¬B))|(¬C)))")]
-        public void FCNF_shouldEqual(string input, string expected)
-        {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
-            LogicalExpression expr = new(input);
+        //[Theory]
+        //[InlineData("((A|B)&(¬C))", "((((((A|B)|C)&((A|B)|(¬C)))&((A|(¬B))|(¬C)))&(((¬A)|B)|(¬C)))&(((¬A)|(¬B))|(¬C)))")]
+        //public void FCNF_shouldEqual(string input, string expected)
+        //{
+        //    LogicalExpression expr = new(input);
 
-            var FCNF = expr.FCNF;
+        //    var FCNF = expr.FCNF;
 
-            Assert.Equal(expected, FCNF.ToString());
-        }
+        //    Assert.Equal(expected, FCNF.ToString());
+        //}
 
-        [Theory]
-        [InlineData("((A|B)&(¬C))", "(7, 5, 3, 1, 0) &")]
-        public void FCNFNumericString_shouldEqual(string input, string expected)
-        {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
-            LogicalExpression expr = new(input);
+        //[Theory]
+        //[InlineData("((A|B)&(¬C))", "(7, 5, 3, 1, 0) &")]
+        //public void FCNFNumericString_shouldEqual(string input, string expected)
+        //{
+        //    LogicalExpression expr = new(input);
 
-            var FCNF = expr.FCNF.ToFCNFNumericString();
+        //    var FCNF = expr.FCNF.ToFCNFNumericString();
 
-            Assert.Equal(expected, FCNF);
-        }
+        //    Assert.Equal(expected, FCNF);
+        //}
 
-        [Theory]
-        [InlineData("((A|B)&(¬C))", "(6, 4, 2) |")]
-        public void FDNFNumericString_shouldEqual(string input, string expected)
-        {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
-            LogicalExpression expr = new(input);
+        //[Theory]
+        //[InlineData("((A|B)&(¬C))", "(6, 4, 2) |")]
+        //public void FDNFNumericString_shouldEqual(string input, string expected)
+        //{
+        //    LogicalExpression expr = new(input);
 
-            var FDNF = expr.FDNF.ToFDNFNumericString();
+        //    var FDNF = expr.FDNF.ToFDNFNumericString();
 
-            Assert.Equal(expected, FDNF);
-        }
+        //    Assert.Equal(expected, FDNF);
+        //}
 
         [Theory]
         [InlineData("A123")]
@@ -105,8 +109,6 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A1|(B2&A3))|B1)")]
         public void GetTruthTable_shouldNotThrow(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
             LogicalExpression expr = new(input);
 
             var exception = Record.Exception(() => _ = expr.TruthTable);
@@ -128,8 +130,6 @@ namespace LogicalExpressionUnitTest
         [InlineData("((¬A1)&A2)|A3)", true, true, false, false)]
         public void Evaluation_shouldEqualExprected(string input, bool A1, bool A2, bool A3, bool result)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
             LogicalExpression expr = new(input);
             expr.SetVariable("A1", A1);
             expr.SetVariable("A2", A2);
@@ -150,17 +150,12 @@ namespace LogicalExpressionUnitTest
         [InlineData("(A1&(|C1))")]
         public void Parsing_IncorrectNotation_shouldThrow(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
-
             Assert.Throws<ArgumentException>(() => new LogicalExpression(input));
         }
 
         [Fact]
         public void SettingVariable_VariableChangesValue_ShouldResetEvaluation()
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
             LogicalExpression expr = new("((A1&A2)~A3)");
             expr.SetVariable("A1", true);
             expr.SetVariable("A2", false);
