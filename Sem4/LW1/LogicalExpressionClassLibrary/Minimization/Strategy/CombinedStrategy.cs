@@ -77,7 +77,7 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
                 {
                     oddNodes.Add(implicant);
 
-                    ConsoleLogger.Log($"Found odd implicant: {implicant}", ConsoleLogger.DebugLevels.Info);
+                    ConsoleLogger.Log($"Found odd implicant: {implicant}", ConsoleLogger.DebugLevels.Debug);
                 }
                 else
                 {
@@ -85,14 +85,16 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
                 }
             }
 
-            if (oddNodes.Count == 0)
+            if (oddNodes.Count == 0 || oddNodes.Count == implicants.Count)
             {
-                ConsoleLogger.Log($"No odd implicants found", ConsoleLogger.DebugLevels.Info);
-            }
-            foreach (var node in oddNodes)
+                ConsoleLogger.Log($"No odd implicants found", ConsoleLogger.DebugLevels.Debug);
+            } else
             {
-                ConsoleLogger.Log($"Removing odd implicant {node}", ConsoleLogger.DebugLevels.Debug);
-                implicants.Remove(node);
+                foreach (var node in oddNodes)
+                {
+                    ConsoleLogger.Log($"Removing odd implicant {node}", ConsoleLogger.DebugLevels.Debug);
+                    implicants.Remove(node);
+                }
             }
             HashSet<string> nodes = implicants.Select(i => i.ToString()!).ToHashSet();
 

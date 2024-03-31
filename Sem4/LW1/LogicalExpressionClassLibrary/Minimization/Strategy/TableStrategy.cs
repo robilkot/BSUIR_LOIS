@@ -11,10 +11,16 @@
                 _ => throw new NotImplementedException()
             };
 
+            var karnaugh = Karnaugh.Karnaugh.CreateKarnaugh(source, form);
             
-            //
+            if(ConsoleLogger.DebugLevel.HasFlag(ConsoleLogger.DebugLevels.Info))
+            {
+                karnaugh.PrintTable();
+            }
+            
+            var nodes = karnaugh.GetConstituents();
 
-            return source;
+            return MinimizationHelper.BuildNFFromStringSet(nodes, form);
         }
     }
 }

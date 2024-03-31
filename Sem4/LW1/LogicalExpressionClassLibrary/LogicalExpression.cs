@@ -364,7 +364,7 @@ namespace LogicalExpressionClassLibrary
         [ExcludeFromCodeCoverage]
         public string ToTruthTableString()
         {
-            const int MaxColumnTitleWidth = 20;
+            const int MaxColumnTitleWidth = 15;
 
             StringBuilder builder = new();
 

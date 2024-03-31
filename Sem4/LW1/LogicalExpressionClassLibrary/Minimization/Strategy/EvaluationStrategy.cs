@@ -51,7 +51,7 @@
                     if (remainder.IsContradictive())
                     {
                         allImplicants.Remove(implicant.ToString()!);
-                        ConsoleLogger.Log($"Found odd implicant {implicant}");
+                        ConsoleLogger.Log($"Found odd implicant {implicant}", ConsoleLogger.DebugLevels.Debug);
 
                         if (allImplicants.Count < 2)
                             break;
@@ -101,7 +101,7 @@
                     if (implicantIsOdd)
                     {
                         allImplicants.Remove(implicant.ToString()!);
-                        ConsoleLogger.Log($"Found odd implicant {implicant}");
+                        ConsoleLogger.Log($"Found odd implicant {implicant}", ConsoleLogger.DebugLevels.Debug);
 
                         if (allImplicants.Count < 2)
                             break;
