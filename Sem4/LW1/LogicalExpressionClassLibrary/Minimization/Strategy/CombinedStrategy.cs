@@ -2,7 +2,7 @@
 
 namespace LogicalExpressionClassLibrary.Minimization.Strategy
 {
-    public class CombinedMinimizationStrategy : IMinimizationStrategy
+    public class CombinedStrategy : IMinimizationStrategy
     {
         public LogicalExpression Minimize(LogicalExpression input, NormalForms form)
         {
@@ -35,7 +35,7 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
                 }
             }
 
-            bool tableIsValid(Dictionary<string, Dictionary<string, bool>> table)
+            static bool tableIsValid(Dictionary<string, Dictionary<string, bool>> table)
             {
                 Dictionary<string, int> containments = [];
 
@@ -89,13 +89,9 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
                 ConsoleLogger.Log($"Removing odd implicant {node}", ConsoleLogger.DebugLevels.Debug);
                 implicants.Remove(node);
             }
-            HashSet<string> nodes = implicants.Select(i => i.ToString()!).ToHashSet();
+            List<string> nodes = implicants.Select(i => i.ToString()!).ToList();
 
-            LogicalExpression toReturn = MinimizationHelper.BuildNFFromStringSet(nodes, form);
-
-            ConsoleLogger.Log($"Minimized expression: {toReturn}", ConsoleLogger.DebugLevels.Info);
-
-            return toReturn;
+            return MinimizationHelper.BuildNFFromStringSet(nodes, form);
         }
     }
 }

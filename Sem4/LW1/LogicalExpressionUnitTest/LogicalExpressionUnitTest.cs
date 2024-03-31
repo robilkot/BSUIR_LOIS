@@ -35,8 +35,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A1|(B2&A3))|B1)")]
         public void RecursiveParsing_shouldEqual(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel = 
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input, new RecursiveLogicalParser());
 
             Assert.Equal(input, expr.ToString());
@@ -46,8 +48,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A|B)&(¬C))", "(((((¬A)&B)&(¬C))|((A&(¬B))&(¬C)))|((A&B)&(¬C)))")]
         public void FDNF_shouldEqual(string input, string expected)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input);
 
             var FDNF = expr.FDNF;
@@ -59,8 +63,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A|B)&(¬C))", "((((((A|B)|C)&((A|B)|(¬C)))&((A|(¬B))|(¬C)))&(((¬A)|B)|(¬C)))&(((¬A)|(¬B))|(¬C)))")]
         public void FCNF_shouldEqual(string input, string expected)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                 ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                 ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input);
 
             var FCNF = expr.FCNF;
@@ -72,8 +78,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A|B)&(¬C))", "(7, 5, 3, 1, 0) &")]
         public void FCNFNumericString_shouldEqual(string input, string expected)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input);
 
             var FCNF = expr.FCNF.ToNFNumericString(NormalForms.FCNF);
@@ -85,8 +93,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A|B)&(¬C))", "(6, 4, 2) |")]
         public void FDNFNumericString_shouldEqual(string input, string expected)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input);
 
             var FDNF = expr.FDNF.ToNFNumericString(NormalForms.FDNF);
@@ -105,8 +115,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A1|(B2&A3))|B1)")]
         public void GetTruthTable_shouldNotThrow(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input);
 
             var exception = Record.Exception(() => _ = expr.TruthTable);
@@ -128,8 +140,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("((¬A1)&A2)|A3)", true, true, false, false)]
         public void Evaluation_shouldEqualExprected(string input, bool A1, bool A2, bool A3, bool result)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new(input);
             expr.SetVariable("A1", A1);
             expr.SetVariable("A2", A2);
@@ -150,8 +164,9 @@ namespace LogicalExpressionUnitTest
         [InlineData("(A1&(|C1))")]
         public void Parsing_IncorrectNotation_shouldThrow(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
 
             Assert.Throws<ArgumentException>(() => new LogicalExpression(input));
         }
@@ -159,8 +174,10 @@ namespace LogicalExpressionUnitTest
         [Fact]
         public void SettingVariable_VariableChangesValue_ShouldResetEvaluation()
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
+
             LogicalExpression expr = new("((A1&A2)~A3)");
             expr.SetVariable("A1", true);
             expr.SetVariable("A2", false);

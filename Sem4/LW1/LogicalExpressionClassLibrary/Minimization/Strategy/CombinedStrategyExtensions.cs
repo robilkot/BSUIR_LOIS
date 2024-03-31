@@ -3,7 +3,7 @@ using System.Text;
 
 namespace LogicalExpressionClassLibrary.Minimization.Strategy
 {
-    public static class CombinedMinimizeStrategyExtensions
+    public static class CombinedStrategyExtensions
     {
         public static bool Contains(this TreeNode constituent, TreeNode implicant, NormalForms form)
         {

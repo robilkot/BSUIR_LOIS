@@ -15,8 +15,9 @@ namespace LogicalExpressionUnitTest
         [InlineData("(")]
         public void AtomicFormulaNode_IncorrectName_shouldThrow(string input)
         {
-            LogicalExpression.Debug = true;
-            TreeNode.DebugLevel = TreeNode.DebugLevels.Eval | TreeNode.DebugLevels.Set | TreeNode.DebugLevels.Clear;
+            ConsoleLogger.DebugLevel =
+                ConsoleLogger.DebugLevels.Debug | ConsoleLogger.DebugLevels.Info |
+                ConsoleLogger.DebugLevels.Warning | ConsoleLogger.DebugLevels.Error;
 
             Assert.Throws<ArgumentException>(() => new AtomicFormulaNode(input));
         }

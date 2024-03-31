@@ -42,6 +42,43 @@ namespace LogicalExpressionClassLibrary.Minimization
 
             return result;
         }
+        public static HashSet<(string variable, bool inverted)> GetVariables(TreeNode constituent, NormalForms form)
+        {
+            HashSet<(string variable, bool inverted)> result = [];
+
+            var currentNode = constituent;
+
+            Type targetType = form switch
+            {
+                NormalForms.FDNF => typeof(ConjunctionNode),
+                NormalForms.FCNF => typeof(DisjunctionNode),
+                _ => throw new NotImplementedException(),
+            };
+            while (currentNode!.GetType() == targetType)
+            {
+                if (currentNode.Right is NegationNode)
+                {
+                    result.Add((currentNode.Right!.Left!.ToString()!, true));
+                }
+                else
+                {
+                    result.Add((currentNode.Right!.ToString()!, false));
+                }
+
+                currentNode = currentNode.Left;
+            }
+
+            if (currentNode is NegationNode)
+            {
+                result.Add((currentNode.Left!.ToString()!, true));
+            }
+            else
+            {
+                result.Add((currentNode.ToString()!, false));
+            }
+
+            return result;
+        }
         public static List<TreeNode> GetConstituents(LogicalExpression input, NormalForms form)
         {
             List<TreeNode> constituents = [];
@@ -64,7 +101,7 @@ namespace LogicalExpressionClassLibrary.Minimization
 
             return constituents;
         }
-        public static LogicalExpression BuildNFFromStringSet(HashSet<string> mergedConstituents, NormalForms form)
+        public static LogicalExpression BuildNFFromStringSet(List<string> constituents, NormalForms form)
         {
             LogicalExpression result = LogicalExpression.Empty;
 
@@ -78,7 +115,7 @@ namespace LogicalExpressionClassLibrary.Minimization
             TreeNode root = null!;
             TreeNode current = root;
 
-            foreach (var constituent in mergedConstituents)
+            foreach (var constituent in constituents)
             {
                 LogicalExpression node = new(constituent);
 
@@ -158,7 +195,7 @@ namespace LogicalExpressionClassLibrary.Minimization
 
                 var pairs = formPairs(constituents);
 
-                HashSet<string> mergedConstituents = [];
+                List<string> mergedConstituents = [];
                 HashSet<string> yetNotProcessedConstituents = constituents.Select(c => c.ToString()).ToHashSet()!;
 
                 foreach (var pair in pairs)
@@ -242,7 +279,7 @@ namespace LogicalExpressionClassLibrary.Minimization
                     yetNotProcessedConstituents.Remove(pair.Item1.ToString()!);
                     yetNotProcessedConstituents.Remove(pair.Item2.ToString()!);
 
-                    ConsoleLogger.Log($"Merged {pair.Item1} and {pair.Item2} to {pairToAdd}", ConsoleLogger.DebugLevels.Info);
+                    ConsoleLogger.Log($"Merged {pair.Item1} and {pair.Item2} to {pairToAdd}", ConsoleLogger.DebugLevels.Debug);
                 }
                 foreach (var constituent in yetNotProcessedConstituents)
                 {

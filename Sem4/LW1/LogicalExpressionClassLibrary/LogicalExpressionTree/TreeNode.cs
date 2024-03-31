@@ -49,7 +49,7 @@
             if (_evaluation != null)
             {
                 string logStringAddition = Parent is null ? string.Empty : $" with parent {Parent}";
-                ConsoleLogger.Log($"Clear value of {GetType().Name}" + logStringAddition, ConsoleLogger.DebugLevels.Debug);
+                ConsoleLogger.Log($"Clear {GetType().Name}" + logStringAddition, ConsoleLogger.DebugLevels.Debug);
 
                 _evaluation = null;
                 // If value is outdated then upper tree part is also outdated

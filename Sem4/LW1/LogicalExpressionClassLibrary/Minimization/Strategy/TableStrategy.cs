@@ -1,8 +1,6 @@
-﻿using static LogicalExpressionClassLibrary.LogicalExpression;
-
-namespace LogicalExpressionClassLibrary.Minimization.Strategy
+﻿namespace LogicalExpressionClassLibrary.Minimization.Strategy
 {
-    public class EvaluationMinimizeStrategy : IMinimizationStrategy
+    public class TableStrategy : IMinimizationStrategy
     {
         public LogicalExpression Minimize(LogicalExpression input, NormalForms form)
         {
@@ -13,8 +11,7 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
                 _ => throw new NotImplementedException()
             };
 
-            source = source.MergeConstituents(form);
-
+            
             //
 
             return source;
