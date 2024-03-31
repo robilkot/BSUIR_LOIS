@@ -1,5 +1,6 @@
 ﻿using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
+using System.Security;
 
 namespace LogicalExpressionClassLibrary.Minimization
 {
@@ -101,7 +102,7 @@ namespace LogicalExpressionClassLibrary.Minimization
 
             return constituents;
         }
-        public static LogicalExpression BuildNFFromStringSet(List<string> constituents, NormalForms form)
+        public static LogicalExpression BuildNFFromStringSet(HashSet<string> constituents, NormalForms form)
         {
             LogicalExpression result = LogicalExpression.Empty;
 
@@ -119,7 +120,8 @@ namespace LogicalExpressionClassLibrary.Minimization
             {
                 LogicalExpression node = new(constituent);
 
-                foreach(var variable in node.Variables)
+                // Set variables dictionary for new expression based on variables used in constituents
+                foreach (var variable in node.Variables)
                 {
                     if(result.Variables.TryGetValue(variable.Key, out var existingValue))
                     {
@@ -145,8 +147,10 @@ namespace LogicalExpressionClassLibrary.Minimization
                 {
                     current.Left = func(node.Root!);
                     current.Left.Parent = current;
+                    current.Right.Parent = current;
                     current = current.Left;
                 }
+
             }
 
             if (current.Parent is not null)
@@ -160,13 +164,12 @@ namespace LogicalExpressionClassLibrary.Minimization
                 root = current;
             }
 
-            // This doesn't set variables dictionary for new expression
             result.Root = root;
             return result;
         }
         public static LogicalExpression MergeConstituents(this LogicalExpression input, NormalForms form)
         {
-            List<(TreeNode, TreeNode)> formPairs(List<TreeNode> constituents)
+            static List<(TreeNode, TreeNode)> formPairs(List<TreeNode> constituents)
             {
                 List<(TreeNode, TreeNode)> pairs = [];
                 HashSet<TreeNode> seenNodes = [];
@@ -195,7 +198,7 @@ namespace LogicalExpressionClassLibrary.Minimization
 
                 var pairs = formPairs(constituents);
 
-                List<string> mergedConstituents = [];
+                HashSet<string> mergedConstituents = [];
                 HashSet<string> yetNotProcessedConstituents = constituents.Select(c => c.ToString()).ToHashSet()!;
 
                 foreach (var pair in pairs)

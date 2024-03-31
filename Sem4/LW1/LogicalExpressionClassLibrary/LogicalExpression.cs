@@ -401,6 +401,12 @@ namespace LogicalExpressionClassLibrary
 
             return !TruthTable.Any(row => row[currentExpressionNotation] == false);
         }
+        public bool IsContradictive()
+        {
+            string currentExpressionNotation = ToString();
+
+            return !TruthTable.Any(row => row[currentExpressionNotation] == true);
+        }
         public bool ImpliesFrom(LogicalExpression source)
         {
             LogicalExpression implication = new($"({source}→{this})");

@@ -4,9 +4,9 @@ using LogicalExpressionClassLibrary.Minimization.Strategy;
 using System.Diagnostics.CodeAnalysis;
 
 ConsoleLogger.DebugLevel =
-    ConsoleLogger.DebugLevels.Info
-    //| ConsoleLogger.DebugLevels.Warning
-     | ConsoleLogger.DebugLevels.Error
+    ConsoleLogger.DebugLevels.Warning
+    | ConsoleLogger.DebugLevels.Error
+    | ConsoleLogger.DebugLevels.Info
     //| ConsoleLogger.DebugLevels.Debug
     ;
 
@@ -17,16 +17,19 @@ List<string> TestCases = [
     "((B→A)~C)",
 ];
 
-var form = NormalForms.FCNF;
-
 LogicalExpression expr = new(TestCases[0]);
 Console.WriteLine(expr.ToString());
 //Console.WriteLine(expr.ToTruthTableString());
 
-//var strategy = new EvaluationStrategy();
-var strategy = new CombinedStrategy();
-var x = expr.Minimize(form, strategy);
-Console.WriteLine(x);
+//var min1FCNF = expr.Minimize(NormalForms.FCNF, new EvaluationStrategy());
+//Console.WriteLine(min1FCNF);
+//var min2FCNF = expr.Minimize(NormalForms.FCNF, new CombinedStrategy());
+//Console.WriteLine(min2FCNF);
+
+var min1FDNF = expr.Minimize(NormalForms.FDNF, new EvaluationStrategy());
+Console.WriteLine(min1FDNF);
+var min2FDNF = expr.Minimize(NormalForms.FDNF, new CombinedStrategy());
+Console.WriteLine(min2FDNF);
 
 //var x = expr.Minimize(form);
 //Console.WriteLine(x);

@@ -15,53 +15,101 @@
 
             var implicants = MinimizationHelper.GetConstituents(source, form);
 
-            bool targetValue = form switch
+            HashSet<string> allImplicants = implicants.Select(i => i.ToString()!).ToHashSet();
+
+            if (form == NormalForms.FDNF)
             {
-                NormalForms.FCNF => true,
-                NormalForms.FDNF => false,
-                _ => throw new NotImplementedException()
-            };
-
-            List<string> allImplicants = implicants.Select(i => i.ToString()!).ToList();
-
-            foreach (var implicant in implicants)
-            {
-                ConsoleLogger.Log($"Trying to remove implicant {implicant}", ConsoleLogger.DebugLevels.Info);
-
-                var variables = MinimizationHelper.GetVariables(implicant, form);
-                List<string> currentImplicantsCombination = [];
-
-                foreach (var modifiedImplicant in allImplicants)
+                foreach (var implicant in implicants)
                 {
-                    string modifiedString = modifiedImplicant;
-                    
-                    foreach (var variable in variables)
+                    ConsoleLogger.Log($"Trying to remove implicant {implicant}", ConsoleLogger.DebugLevels.Debug);
+
+                    var variables = MinimizationHelper.GetVariables(implicant, form);
+                    HashSet<string> currentImplicantsCombination = [];
+
+                    foreach (var implicantToModify in allImplicants)
                     {
-                        modifiedString =
-                            modifiedString.Replace(variable.variable.ToString()!,
-                            (targetValue ^ variable.inverted) ?
-                            ((char)LogicalSymbols.True).ToString()! :
-                            ((char)LogicalSymbols.False).ToString()!);
+                        string modifiedString = implicantToModify;
+
+                        foreach (var variable in variables)
+                        {
+                            modifiedString =
+                                modifiedString.Replace(variable.variable.ToString()!,
+                                variable.inverted ?
+                                ((char)LogicalSymbols.True).ToString()! :
+                                ((char)LogicalSymbols.False).ToString()!);
+                        }
+
+                        currentImplicantsCombination.Add(modifiedString);
+
+                        ConsoleLogger.Log($"Modified implicant {implicantToModify} to {modifiedString}", ConsoleLogger.DebugLevels.Debug);
                     }
 
-                    currentImplicantsCombination.Add(modifiedString);
+                    LogicalExpression remainder = MinimizationHelper.BuildNFFromStringSet(currentImplicantsCombination, form);
 
-                    ConsoleLogger.Log($"Modified implicant {modifiedImplicant} to {modifiedString}", ConsoleLogger.DebugLevels.Debug);
-                }
+                    ConsoleLogger.Log($"Expression without implicant {implicant}\n{remainder.ToTruthTableString()}", ConsoleLogger.DebugLevels.Debug);
 
-                // doesn't work because we removed variables;
+                    if (remainder.IsContradictive())
+                    {
+                        allImplicants.Remove(implicant.ToString()!);
+                        ConsoleLogger.Log($"Found odd implicant {implicant}");
 
-                LogicalExpression remainder = MinimizationHelper.BuildNFFromStringSet(currentImplicantsCombination, form);
-
-                ConsoleLogger.Log($"Expression without implicant {remainder}");
-                ConsoleLogger.Log("\n" + remainder.ToTruthTableString());
-
-                if (remainder.IsTautology())
-                {
-                    allImplicants.Remove(implicant.ToString()!);
-                    ConsoleLogger.Log($"Found odd implicant {implicant}", ConsoleLogger.DebugLevels.Info);
+                        if (allImplicants.Count < 2)
+                            break;
+                    }
                 }
             }
+            else if (form == NormalForms.FCNF)
+            {
+                foreach (var implicant in implicants)
+                {
+                    ConsoleLogger.Log($"Trying to remove implicant {implicant}", ConsoleLogger.DebugLevels.Debug);
+
+                    var variables = MinimizationHelper.GetVariables(implicant, form);
+
+                    bool implicantIsOdd = false;
+
+                    foreach (var variable in variables)
+                    {
+                        HashSet<string> currentImplicantsCombination = [];
+                        
+                        foreach (var implicantToModify in allImplicants)
+                        {
+                            string modifiedString = implicantToModify;
+
+                            modifiedString =
+                                modifiedString.Replace(variable.variable.ToString()!,
+                                variable.inverted ?
+                                ((char)LogicalSymbols.False).ToString()! :
+                                ((char)LogicalSymbols.True).ToString()!);
+
+                            currentImplicantsCombination.Add(modifiedString);
+
+                            ConsoleLogger.Log($"Modified implicant {implicantToModify} to {modifiedString}", ConsoleLogger.DebugLevels.Debug);
+                        }
+
+                        LogicalExpression exprWithoutOneVariable = MinimizationHelper.BuildNFFromStringSet(currentImplicantsCombination, form);
+
+                        ConsoleLogger.Log($"{exprWithoutOneVariable} without {variable}\n{exprWithoutOneVariable.ToTruthTableString()}", ConsoleLogger.DebugLevels.Debug);
+
+                        if (exprWithoutOneVariable.IsContradictive())
+                        {
+                            implicantIsOdd = true;
+                            break;
+                        }
+                    }
+
+                    if (implicantIsOdd)
+                    {
+                        allImplicants.Remove(implicant.ToString()!);
+                        ConsoleLogger.Log($"Found odd implicant {implicant}");
+
+                        if (allImplicants.Count < 2)
+                            break;
+                    }
+                }
+            }
+            else
+                throw new NotImplementedException();
 
             return MinimizationHelper.BuildNFFromStringSet(allImplicants, form);
         }

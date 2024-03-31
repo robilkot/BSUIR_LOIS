@@ -25,13 +25,18 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
             foreach (var implicant in implicants)
             {
                 string implicantNotation = implicant.ToString()!;
-                table.Add(implicantNotation, []);
-
-                // columns
-                foreach (var constituent in constituents)
+                
+                if (table.TryAdd(implicantNotation, []))
                 {
-                    string constituentNotation = constituent.ToString()!;
-                    table[implicantNotation].Add(constituentNotation, constituent.Contains(implicant, form));
+                    // columns
+                    foreach (var constituent in constituents)
+                    {
+                        string constituentNotation = constituent.ToString()!;
+                        table[implicantNotation].Add(constituentNotation, constituent.Contains(implicant, form));
+                    }
+                } else
+                {
+                    ConsoleLogger.Log("Implicant row already exists in table. Please report", ConsoleLogger.DebugLevels.Warning);
                 }
             }
 
@@ -89,7 +94,7 @@ namespace LogicalExpressionClassLibrary.Minimization.Strategy
                 ConsoleLogger.Log($"Removing odd implicant {node}", ConsoleLogger.DebugLevels.Debug);
                 implicants.Remove(node);
             }
-            List<string> nodes = implicants.Select(i => i.ToString()!).ToList();
+            HashSet<string> nodes = implicants.Select(i => i.ToString()!).ToHashSet();
 
             return MinimizationHelper.BuildNFFromStringSet(nodes, form);
         }
