@@ -15,6 +15,12 @@
 
             var implicants = MinimizationHelper.GetConstituents(source, form);
 
+            if(implicants.Count < 2)
+            {
+                ConsoleLogger.Log($"Expression already minimized", ConsoleLogger.DebugLevels.Info);
+                return source;
+            }
+
             HashSet<string> allImplicants = implicants.Select(i => i.ToString()!).ToHashSet();
 
             if (form == NormalForms.FDNF)
@@ -71,7 +77,7 @@
                     foreach (var variable in variables)
                     {
                         HashSet<string> currentImplicantsCombination = [];
-                        
+
                         foreach (var implicantToModify in allImplicants)
                         {
                             string modifiedString = implicantToModify;
@@ -111,7 +117,15 @@
             else
                 throw new NotImplementedException();
 
-            return MinimizationHelper.BuildNFFromStringSet(allImplicants, form);
+            try
+            {
+                return MinimizationHelper.BuildNFFromStringSet(allImplicants, form);
+            }
+            catch (Exception ex)
+            {
+                ConsoleLogger.Log(ex.Message, ConsoleLogger.DebugLevels.Error);
+                return LogicalExpression.Empty;
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using LogicalExpressionClassLibrary.LogicalParser;
+using LogicalExpressionClassLibrary.Minimization.Strategy;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;

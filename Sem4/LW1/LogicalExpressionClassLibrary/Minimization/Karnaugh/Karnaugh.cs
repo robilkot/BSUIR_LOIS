@@ -1,4 +1,6 @@
-﻿namespace LogicalExpressionClassLibrary.Minimization.Karnaugh
+﻿using System.Drawing;
+
+namespace LogicalExpressionClassLibrary.Minimization.Karnaugh
 {
     public abstract class Karnaugh(NormalForms normalForm)
     {
@@ -79,9 +81,7 @@
                     }
                 }
             }
-            result = RemoveSubsets(result);
-            _areas = result;
-            return result;
+            return RemoveSubsets(result);
         }
         protected static Dictionary<string, bool> GenerateAdditionalTruthTable(LogicalExpression expression)
         {
@@ -176,7 +176,7 @@
                 {
                     if (i == j)
                         continue;
-                    if (IsEqual(lists[i], lists[j]) && i > j)
+                    if (i > j && lists[j].Count == lists[i].Count && lists[i].All(lists[j].Contains))
                     {
                         if (i < j)
                         {
@@ -238,7 +238,6 @@
         }
         private static bool IsSubset(List<(int, int, int)> list1, List<(int, int, int)> list2) => list1.All(list2.Contains);
         private static bool HaveNoCommonElements(List<(int, int, int)> list1, List<(int, int, int)> list2) => !list2.Any(list1.Contains);
-        private static bool IsEqual(List<(int, int, int)> list1, List<(int, int, int)> list2) => list1.All(list2.Contains) && list2.Count == list1.Count;
         protected List<(int, int, int)> RemoveDoubles(List<(int, int, int)> rectangle)
         {
             rectangle = rectangle.Distinct().ToList();
@@ -276,92 +275,74 @@
 
         protected void Traverse1(List<List<(int, int, int)>> result, (int k, int i, int j) point)
         {
-            List<(int, int, int)> temp;
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 1, 2));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-            temp.Clear();
+            (int k, int i, int j)[] coords =
+            [
+                (1, 1, 2),
+            ];
+
+            TraverseHelper(coords, result, point);
         }
 
         protected void Traverse2(List<List<(int, int, int)>> result, (int k, int i, int j) point)
         {
-            List<(int, int, int)> temp;
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 2, 1));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-            temp.Clear();
+            (int k, int i, int j)[] coords =
+            [
+                (1, 2, 1),
+                (1, 2, 2),
+            ];
 
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 2, 2));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
+            TraverseHelper(coords, result, point);
         }
 
         protected void Traverse3(List<List<(int, int, int)>> result, (int k, int i, int j) point)
         {
-            List<(int, int, int)> temp;
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 1, 1));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
+            (int k, int i, int j)[] coords =
+            [
+                (2,1,1),
+                (2,2,1),
+                (2,1,2),
+                (2,2,2),
+            ];
 
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 2, 1));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 1, 2));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 2, 2));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
+            TraverseHelper(coords, result, point);
         }
 
         protected void Traverse4(List<List<(int, int, int)>> result, (int k, int i, int j) point)
         {
-            List<(int, int, int)> temp;
+            (int k, int i, int j)[] coords =
+            [
+                (1, 1, 4),
+                (1, 2, 4),
+                (2, 1, 4),
+                (2, 2, 4),
+            ];
 
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 1, 4));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-            temp.Clear();
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 2, 4));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 1, 4));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 2, 4));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
+            TraverseHelper(coords, result, point);
         }
 
         protected void Traverse5(List<List<(int, int, int)>> result, (int k, int i, int j) point)
         {
-            List<(int, int, int)> temp;
+            (int k, int i, int j)[] coords =
+            [
+                (1, 4, 1),
+                (1, 4, 2),
+                (2, 4, 1),
+                (2, 4, 2),
+                (2, 4, 4),
+            ];
 
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 4, 1));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-            temp.Clear();
+            TraverseHelper(coords, result, point);
+        }
 
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 1, 4, 2));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 4, 1));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 4, 2));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
-
-            temp = RemoveDoubles(Increase((point.k, point.i, point.j), 2, 4, 4));
-            if (RectangleIsValid(temp))
-                result.Add(new List<(int, int, int)>(temp));
+        private void TraverseHelper((int k, int i, int j)[] coords, List<List<(int, int, int)>> result, (int k, int i, int j) point)
+        {
+            foreach (var (k, i, j) in coords)
+            {
+                List<(int, int, int)> temp;
+                temp = RemoveDoubles(Increase((point.k, point.i, point.j), k, i, j));
+                if (RectangleIsValid(temp))
+                    result.Add(temp);
+            }
         }
     }
 }

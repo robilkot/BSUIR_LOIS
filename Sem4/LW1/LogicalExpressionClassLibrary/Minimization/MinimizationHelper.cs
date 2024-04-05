@@ -104,6 +104,10 @@ namespace LogicalExpressionClassLibrary.Minimization
         }
         public static LogicalExpression BuildNFFromStringSet(HashSet<string> constituents, NormalForms form)
         {
+            if(constituents.Count == 0)
+            {
+                throw new InvalidOperationException($"Cannot build {form}");
+            }
             LogicalExpression result = LogicalExpression.Empty;
 
             Func<TreeNode, TreeNode> func = form switch

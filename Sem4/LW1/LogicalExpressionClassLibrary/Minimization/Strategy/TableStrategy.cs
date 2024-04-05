@@ -12,15 +12,23 @@
             };
 
             var karnaugh = Karnaugh.Karnaugh.CreateKarnaugh(source, form);
-            
-            if(ConsoleLogger.DebugLevel.HasFlag(ConsoleLogger.DebugLevels.Info))
+
+            if (ConsoleLogger.DebugLevel.HasFlag(ConsoleLogger.DebugLevels.Info))
             {
                 karnaugh.PrintTable();
             }
-            
+
             var nodes = karnaugh.GetConstituents();
 
-            return MinimizationHelper.BuildNFFromStringSet(nodes, form);
+            try
+            {
+                return MinimizationHelper.BuildNFFromStringSet(nodes, form);
+            }
+            catch (Exception ex)
+            {
+                ConsoleLogger.Log(ex.Message, ConsoleLogger.DebugLevels.Error);
+                return LogicalExpression.Empty;
+            }
         }
     }
 }
