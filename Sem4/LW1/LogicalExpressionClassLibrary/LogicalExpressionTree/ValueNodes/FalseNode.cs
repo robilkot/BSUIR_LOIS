@@ -11,6 +11,8 @@
 // - Основы Алгоритмизации и Программирования (2 семестр). Практикум
 //
 
+using static LogicalExpressionClassLibrary.AppConstants;
+
 namespace LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes
 {
     public sealed class FalseNode : TreeNode
@@ -19,6 +21,6 @@ namespace LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes
         private FalseNode() : base(null, null) { }
         public static FalseNode GetInstance() => _instance;
         protected override bool Evaluate() => false;
-        public override string ToString() => $"{(char)LogicalSymbols.False}";
+        public override string ToString() => $"{LogicalSymbolsDict[LogicalSymbols.False]}";
     }
 }

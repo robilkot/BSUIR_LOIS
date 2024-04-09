@@ -14,6 +14,7 @@
 using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
+using static LogicalExpressionClassLibrary.AppConstants;
 
 namespace LogicalExpressionClassLibrary.LogicalParser
 {
@@ -57,7 +58,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 
             return (root, new(_variables));
         }
-        
+
         private TreeNode BuildFormulaTree(string input, ref int i, TreeNode? parentNode)
         {
             TreeNode toReturn = null!;
@@ -70,8 +71,8 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 if (char.IsLetter(input[i]))
                 {
                     var variableName = ExtractVariableName(input, ref i);
-                 
-                    if(toReturn is not null)
+
+                    if (toReturn is not null)
                     {
                         throw new ArgumentException($"Unexpected variable '{variableName}' in expression notation");
                     }
@@ -98,8 +99,32 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     }
                 }
 
+                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.LeftBracket][0])
+                {
+                    indent++;
+
+                    if (indent > 0)
+                    {
+                        i++;
+
+                        var newNode = BuildFormulaTree(input, ref i, toReturn);
+
+                        toReturn = newNode;
+                    }
+                }
+                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.RightBracket][0])
+                {
+                    indent--;
+
+                    // Stop parsing inner expression
+                    if (indent <= 0)
+                    {
+                        break;
+                    }
+                }
+
                 // Encountered symbol is unary (negation) operator
-                else if (input[i] == (char)LogicalSymbols.Negation)
+                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.Negation][0])
                 {
                     i++;
 
@@ -113,18 +138,60 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     break;
                 }
 
-                // Encountered symbol is binary operator
-                else if (_binaryOperatorsNodes.TryGetValue((LogicalSymbols)input[i], out var nodeGenerator))
+                else
                 {
+                    LogicalSymbols binaryOperator;
+
+                    switch (input[i])
+                    {
+                        case '\\':
+                            {
+                                if (i < input.Length - 1 && input[i + 1] == '/')
+                                {
+                                    binaryOperator = LogicalSymbols.Disjunction;
+                                    break;
+                                }
+                                else throw new ArgumentException($"Expected '{LogicalSymbols.Disjunction}'");
+                            }
+                        case '/':
+                            {
+                                if (i < input.Length - 1 && input[i + 1] == '\\')
+                                {
+                                    binaryOperator = LogicalSymbols.Conjunction;
+                                    break;
+                                }
+                                else throw new ArgumentException($"Expected '{LogicalSymbols.Conjunction}'");
+                            }
+                        case '-':
+                            {
+                                if (i < input.Length - 1 && input[i + 1] == '>')
+                                {
+                                    binaryOperator = LogicalSymbols.Implication;
+                                    break;
+                                }
+                                else throw new ArgumentException($"Expected '{LogicalSymbols.Implication}'");
+                            }
+                        case '~':
+                            {
+                                binaryOperator = LogicalSymbols.Equality;
+                                break;
+                            }
+                        default:
+                            {
+                                throw new ArgumentException($"Unexpected token '{input[i]}' in expression notation");
+                            }
+                    }
+
+
                     if (toReturn == null)
                     {
                         string exceptionCommentary = input.Insert(i, "__?__");
                         throw new ArgumentException($"Missing operand before '{input[i]}': {exceptionCommentary}");
                     }
 
-                    i++;
+                    i += LogicalSymbolsDict[binaryOperator].Length;
 
-                    var newNode = nodeGenerator(toReturn, null!);
+                    var newNode = _binaryOperatorsNodes[binaryOperator](toReturn, null!);
 
                     toReturn.Parent = newNode;
 
@@ -134,39 +201,12 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 
                     break;
                 }
-
-                else if (input[i] == (char)LogicalSymbols.LeftBracket)
-                {
-                    indent++;
-
-                    if (indent > 0)
-                    {
-                        i++;
-
-                        var newNode = BuildFormulaTree(input, ref i, toReturn);
-
-                        toReturn = newNode;
-                    }
-                }
-                else if (input[i] == (char)LogicalSymbols.RightBracket)
-                {
-                    indent--;
-
-                    // Stop parsing inner expression
-                    if (indent <= 0)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException($"Unexpected token '{input[i]}' in expression notation");
-                }
             }
 
-            if(toReturn == null)
+            if (toReturn == null)
             {
-                throw new ArgumentException("Missing token in expression notation");
+                string exceptionCommentary = input.Insert(i, "__?__");
+                throw new ArgumentException($"Missing token in expression notation: {exceptionCommentary}");
             }
             toReturn.Parent = parentNode;
 

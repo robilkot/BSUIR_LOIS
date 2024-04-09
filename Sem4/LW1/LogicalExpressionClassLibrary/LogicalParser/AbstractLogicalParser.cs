@@ -15,6 +15,7 @@
 using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
+using static LogicalExpressionClassLibrary.AppConstants;
 
 namespace LogicalExpressionClassLibrary.LogicalParser
 {

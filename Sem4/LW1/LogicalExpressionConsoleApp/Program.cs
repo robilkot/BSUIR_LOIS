@@ -14,23 +14,23 @@
 
 using LogicalExpressionClassLibrary;
 using System.Diagnostics.CodeAnalysis;
+using static LogicalExpressionClassLibrary.AppConstants;
 
-
-//ConsoleLogger.DebugLevel = 
-//    ConsoleLogger.DebugLevels.Info 
-//    | ConsoleLogger.DebugLevels.Debug
-//    | ConsoleLogger.DebugLevels.Error
-//    | ConsoleLogger.DebugLevels.Warning;
+ConsoleLogger.DebugLevel =
+    ConsoleLogger.DebugLevels.Info
+    | ConsoleLogger.DebugLevels.Debug
+    | ConsoleLogger.DebugLevels.Error
+    | ConsoleLogger.DebugLevels.Warning;
 
 List<string> TestCases = [
-    "(A&B)",
-    "(A)",
-    "(A&(B|C))",
-    "(B&C)",
-    $"(A{(char)LogicalSymbols.Implication}(B~C))",
-    $"(({(char)LogicalSymbols.Negation}B)&C)",
-    $"(({(char)LogicalSymbols.Negation}A)|C)",
-    $"((B{(char)LogicalSymbols.Implication}A)~C)",
+    $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}B)",
+    $"(A)",
+    $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}(B{LogicalSymbolsDict[LogicalSymbols.Disjunction]}C))",
+    $"(B{LogicalSymbolsDict[LogicalSymbols.Conjunction]}C)",
+    $"(A{LogicalSymbolsDict[LogicalSymbols.Implication]}(B{LogicalSymbolsDict[LogicalSymbols.Equality]}C))",
+    $"(({LogicalSymbolsDict[LogicalSymbols.Negation]}B){LogicalSymbolsDict[LogicalSymbols.Conjunction]}C)",
+    $"(({LogicalSymbolsDict[LogicalSymbols.Negation]}A){LogicalSymbolsDict[LogicalSymbols.Disjunction]}C)",
+    $"((B{LogicalSymbolsDict[LogicalSymbols.Implication]}A){LogicalSymbolsDict[LogicalSymbols.Equality]}C)",
 ];
 
 void InputExpression(out LogicalExpression expr)

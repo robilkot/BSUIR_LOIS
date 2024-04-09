@@ -11,14 +11,17 @@
 // - Основы Алгоритмизации и Программирования (2 семестр). Практикум
 //
 
-using System.Xml.Linq;
+using static LogicalExpressionClassLibrary.AppConstants;
 
 namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
     public sealed class NegationNode(TreeNode? left) : TreeNode(left, null)
     {
         protected override bool Evaluate() => !Left!.Evaluation;
-        public override string ToString()
-            => $"{(char)LogicalSymbols.LeftBracket}{(char)LogicalSymbols.Negation}{Left}{(char)LogicalSymbols.RightBracket}";
+        public override string ToString() => 
+            $"{LogicalSymbolsDict[LogicalSymbols.LeftBracket]}" +
+            $"{LogicalSymbolsDict[LogicalSymbols.Negation]}" +
+            $"{Left}" +
+            $"{LogicalSymbolsDict[LogicalSymbols.RightBracket]}";
     }
 }

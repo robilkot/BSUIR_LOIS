@@ -11,12 +11,18 @@
 // - Основы Алгоритмизации и Программирования (2 семестр). Практикум
 //
 
+using static LogicalExpressionClassLibrary.AppConstants;
+
 namespace LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes
 {
     public sealed class ConjunctionNode(TreeNode? left, TreeNode? right) : TreeNode(left, right)
     {
         protected override bool Evaluate() => Left!.Evaluation && Right!.Evaluation;
-        public override string ToString()
-            => $"{(char)LogicalSymbols.LeftBracket}{Left}{(char)LogicalSymbols.Conjunction}{Right}{(char)LogicalSymbols.RightBracket}";
+        public override string ToString() => 
+            $"{LogicalSymbolsDict[LogicalSymbols.LeftBracket]}" +
+            $"{Left}" +
+            $"{LogicalSymbolsDict[LogicalSymbols.Conjunction]}" +
+            $"{Right}" +
+            $"{LogicalSymbolsDict[LogicalSymbols.RightBracket]}";
     }
 }

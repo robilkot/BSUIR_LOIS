@@ -18,6 +18,7 @@ using LogicalExpressionClassLibrary.LogicalParser;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using static LogicalExpressionClassLibrary.AppConstants;
 
 namespace LogicalExpressionClassLibrary
 {
@@ -172,13 +173,13 @@ namespace LogicalExpressionClassLibrary
             {
                 foreach (var kvp in truthRow)
                 {
-                    string v = kvp.Value ? $"| {(char)LogicalSymbols.True} " : $"| {(char)LogicalSymbols.False} ";
+                    string v = kvp.Value ? $"| {LogicalSymbolsDict[LogicalSymbols.True]} " : $"| {LogicalSymbolsDict[LogicalSymbols.False]} ";
 
                     builder.Append(v.PadRight(Math.Min(kvp.Key.Length, MaxColumnTitleWidth) + 3));
                 }
 
                 var expressionValue = truthRow[ToString()];
-                builder.AppendLine(expressionValue ? $"|   {(char)LogicalSymbols.True}   |" : $"|   {(char)LogicalSymbols.False}   |");
+                builder.AppendLine(expressionValue ? $"|   {LogicalSymbolsDict[LogicalSymbols.True]}   |" : $"|   {LogicalSymbolsDict[LogicalSymbols.False]}   |");
             }
 
             builder.Append(separator);
@@ -193,7 +194,13 @@ namespace LogicalExpressionClassLibrary
         }
         public bool ImpliesFrom(LogicalExpression source)
         {
-            LogicalExpression implication = new($"({source}{(char)LogicalSymbols.Implication}{this})");
+            LogicalExpression implication = new(
+                $"{LogicalSymbolsDict[LogicalSymbols.LeftBracket]}" +
+                $"{source}" +
+                $"{LogicalSymbolsDict[LogicalSymbols.Implication]}" +
+                $"{this}" +
+                $"{LogicalSymbolsDict[LogicalSymbols.RightBracket]}"
+                );
 
             return implication.IsTautology();
         }

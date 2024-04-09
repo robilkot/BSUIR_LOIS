@@ -13,18 +13,31 @@
 
 namespace LogicalExpressionClassLibrary
 {
-    public enum LogicalSymbols
+    public static class AppConstants
     {
-        Disjunction = '|',
-        Conjunction = '&',
-        LeftBracket = '(',
-        RightBracket = ')',
-        Equality = '~',
-        //Implication = '→',
-        Implication = '>',
-        //Negation = '¬',
-        Negation = '!',
-        False = 'F',
-        True = 'T',
+        public enum LogicalSymbols
+        {
+            Disjunction,
+            Conjunction,
+            LeftBracket,
+            RightBracket,
+            Equality,
+            Implication,
+            Negation,
+            False,
+            True,
+        };
+        public static Dictionary<LogicalSymbols, string> LogicalSymbolsDict = new()
+        {
+            { LogicalSymbols.Disjunction, "\\/" },
+            { LogicalSymbols.Conjunction, "/\\" },
+            { LogicalSymbols.LeftBracket, "(" },
+            { LogicalSymbols.RightBracket, ")" },
+            { LogicalSymbols.Equality, "~" },
+            { LogicalSymbols.Implication, "->" }, // →
+            { LogicalSymbols.Negation, "¬" },
+            { LogicalSymbols.False, "F" },
+            { LogicalSymbols.True, "T" },
+    };
     }
 }
