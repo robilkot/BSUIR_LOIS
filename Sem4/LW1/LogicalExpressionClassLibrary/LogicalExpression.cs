@@ -17,6 +17,7 @@ using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using LogicalExpressionClassLibrary.LogicalParser;
 using System.Collections;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using static LogicalExpressionClassLibrary.AppConstants;
@@ -51,33 +52,32 @@ namespace LogicalExpressionClassLibrary
             (_root, _variables) = logicalParser.Parse(input);
         }
         private LogicalExpression() { }
+        private static void NextCombination(BitArray bits)
+        {
+            for (int i = bits.Length - 1; i >= 0; i--)
+            {
+                bits[i] = !bits[i];
+
+                if (bits[i])
+                {
+                    break;
+                }
+            }
+        }
+        private static void StoreEvaluation(Dictionary<string, bool> truthRow, TreeNode? root)
+        {
+            if (root is null)
+            {
+                return;
+            }
+
+            truthRow[root.ToString()!] = root.Evaluation;
+
+            StoreEvaluation(truthRow, root.Left);
+            StoreEvaluation(truthRow, root.Right);
+        }
         private List<Dictionary<string, bool>> BuildTruthTable()
         {
-            static void NextCombination(BitArray bits)
-            {
-                for (int i = bits.Length - 1; i >= 0; i--)
-                {
-                    bits[i] = !bits[i];
-
-                    if (bits[i])
-                    {
-                        break;
-                    }
-                }
-            }
-
-            static void StoreEvaluation(Dictionary<string, bool> truthRow, TreeNode? root)
-            {
-                if (root is null)
-                {
-                    return;
-                }
-
-                truthRow[root.ToString()!] = root.Evaluation;
-
-                StoreEvaluation(truthRow, root.Left);
-                StoreEvaluation(truthRow, root.Right);
-            }
 
             List<Dictionary<string, bool>> truthTable = [];
 
@@ -195,15 +195,88 @@ namespace LogicalExpressionClassLibrary
         }
         public bool ImpliesFrom(LogicalExpression source)
         {
-            LogicalExpression implication = new(
-                $"{LogicalSymbolsDict[LogicalSymbols.LeftBracket]}" +
-                $"{source}" +
-                $"{LogicalSymbolsDict[LogicalSymbols.Implication]}" +
-                $"{this}" +
-                $"{LogicalSymbolsDict[LogicalSymbols.RightBracket]}"
-                );
+            LogicalExpression implication = new();
+            #region Build implication expression
 
-            return implication.IsTautology();
+            var newRoot = new ImplicationNode(source._root, _root);
+
+            _root.Parent = newRoot;
+            source._root.Parent = newRoot;
+
+            implication._root = newRoot;
+
+            foreach (var variable in source._variables)
+            {
+                implication._variables.Add(variable.Key, variable.Value);
+            }
+            foreach (var variable in _variables)
+            {
+                if (implication._variables.TryGetValue(variable.Key, out var varlist))
+                {
+                    varlist.AddRange(_variables[variable.Key]);
+                }
+                else
+                {
+                    implication._variables.Add(variable.Key, variable.Value);
+                }
+            }
+            #endregion
+
+            bool resultBoolean = true;
+
+            // Preserve initial state before checking all combinations of variables
+            Dictionary<string, bool> initialVariablesState = [];
+
+            foreach (var kvp in implication._variables)
+            {
+                initialVariablesState[kvp.Key] = kvp.Value[0].Value;
+            }
+
+            // Mask indicates which variables will be true
+            BitArray variablesTruthMask = new(implication._variables.Count, false);
+
+            do
+            {
+                int variableIndex = 0;
+
+                foreach (var v in implication._variables.Values)
+                {
+                    foreach (var node in v)
+                    {
+                        node.Value = variablesTruthMask[variableIndex];
+                    }
+
+                    variableIndex++;
+                }
+
+                if (implication.Evaluation == false)
+                {
+                    resultBoolean = false;
+                    break;
+                }
+                
+                NextCombination(variablesTruthMask);
+            }
+            while (variablesTruthMask.HasAnySet());
+
+            #region Restore initial values
+
+            foreach (var kv in initialVariablesState)
+            {
+                var listOfNodesToReset = implication._variables[kv.Key];
+
+                foreach (var node in listOfNodesToReset)
+                {
+                    node.Value = kv.Value;
+                }
+            }
+
+            _root.Parent = null;
+            source._root.Parent = null;
+
+            #endregion
+
+            return resultBoolean;
         }
     }
 }

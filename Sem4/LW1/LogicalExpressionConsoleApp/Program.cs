@@ -14,8 +14,14 @@
 //
 
 using LogicalExpressionClassLibrary;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using static LogicalExpressionClassLibrary.AppConstants;
+
+ConsoleLogger.DebugLevel =
+    ConsoleLogger.DebugLevels.Error |
+    ConsoleLogger.DebugLevels.Warning |
+    ConsoleLogger.DebugLevels.Info;
 
 List<string> TestCases = [
     $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}B)",
@@ -53,8 +59,8 @@ void CheckImplication()
     Console.WriteLine("Input second formula:");
     InputExpression(out LogicalExpression expr2);
 
-    Console.WriteLine(expr1.ToTruthTableString());
-    Console.WriteLine(expr2.ToTruthTableString());
+    //Console.WriteLine(expr1.ToTruthTableString());
+    //Console.WriteLine(expr2.ToTruthTableString());
     Console.WriteLine($"{expr2} " + (expr2.ImpliesFrom(expr1) ? "implies" : "doesn't imply") + $" from {expr1}\n");
 }
 
@@ -80,10 +86,16 @@ void CheckKnowledge()
     else
     {
         Console.WriteLine("\nIncorrect! Compare truth tables to find out why:");
-        Console.WriteLine(expr1.ToTruthTableString());
-        Console.WriteLine(expr2.ToTruthTableString());
+        //Console.WriteLine(expr1.ToTruthTableString());
+        //Console.WriteLine(expr2.ToTruthTableString());
     };
 }
+//while (true)
+//{
+//    CheckImplication();
+//}
+
+Benchmarks.Execute();
 
 while (true)
 {

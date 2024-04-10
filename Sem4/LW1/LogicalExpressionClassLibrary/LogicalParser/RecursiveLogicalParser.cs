@@ -25,159 +25,118 @@ namespace LogicalExpressionClassLibrary.LogicalParser
         {
             _variables.Clear();
 
-            int runningIndex = 0;
+            (int i, int leftBracketsCount, int rightBracketsCount) refs = (0, 0, 0);
 
-            var root = BuildFormulaTree(input, ref runningIndex, null);
+            var root = BuildFormulaTree(input, ref refs, null);
 
             return (root, new(_variables));
         }
 
-        private TreeNode BuildFormulaTree(string input, ref int i, TreeNode? parentNode)
+        private TreeNode BuildFormulaTree(string input, ref (int i, int leftBracketsCount, int rightBracketsCount) refs, TreeNode? parentNode)
         {
             TreeNode toReturn = null!;
 
-            int indent = 0;
-
-            for (; i < input.Length; i++)
+            for (; refs.i < input.Length; refs.i++)
             {
-                // Encountered symbol is variable or const
-                if (char.IsLetter(input[i]))
+                if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.LeftBracket][0])
                 {
-                    if (char.IsLower(input[i]))
+                    refs.leftBracketsCount++;
+                    refs.i++;
+
+                    toReturn = BuildFormulaTree(input, ref refs, toReturn);
+                }
+                else if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.RightBracket][0])
+                {
+                    refs.rightBracketsCount++;
+                    break;
+                }
+                else if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.False][0])
+                {
+                    toReturn = toReturn is null
+                        ? _constNodes[LogicalSymbols.False]
+                        : throw new ArgumentException($"Unexpected symbol '{input[refs.i]}'");
+                }
+                else if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.True][0])
+                {
+                    toReturn = toReturn is null
+                        ? _constNodes[LogicalSymbols.True]
+                        : throw new ArgumentException($"Unexpected symbol '{input[refs.i]}'");
+                }
+
+                else if (char.IsLetter(input[refs.i]))
+                {
+                    if (char.IsLower(input[refs.i]))
                     {
-                        throw new ArgumentException("Variable cannot have lowercase letter");
+                        throw new ArgumentException("Variable must be an uppercase letter");
                     }
-                    string variableName = input[i].ToString();
 
                     if (toReturn is not null)
                     {
-                        throw new ArgumentException($"Unexpected variable '{variableName}' in expression notation");
+                        throw new ArgumentException($"Unexpected variable '{input[refs.i]}'");
                     }
 
+                    string variableName = input[refs.i].ToString();
+                    //refs.i++;
+
+                    var atomicFormulaNode = new AtomicFormulaNode(variableName);
+
+                    // Store variable name association with node for expression
+                    if (_variables.TryGetValue(variableName, out var alreadyCreatedList))
+                    {
+                        alreadyCreatedList.Add(atomicFormulaNode);
+                    }
                     else
                     {
-                        var atomicFormulaNode = new AtomicFormulaNode(variableName);
-
-                        // Store variable name association with node for expression
-                        if (_variables.TryGetValue(variableName, out var alreadyCreatedList))
-                        {
-                            alreadyCreatedList.Add(atomicFormulaNode);
-                        }
-                        else
-                        {
-                            _variables.Add(variableName, [atomicFormulaNode]);
-                        }
-
-                        toReturn = atomicFormulaNode;
+                        _variables.Add(variableName, [atomicFormulaNode]);
                     }
-                }
-                else if(input[i] == LogicalSymbolsDict[LogicalSymbols.False][0])
-                {
-                    if (toReturn is not null)
-                    {
-                        throw new ArgumentException($"Unexpected symbol '{input[i]}'");
-                    }
-                    toReturn = _constNodes[LogicalSymbols.False];
-                }
-                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.True][0])
-                {
-                    if (toReturn is not null)
-                    {
-                        throw new ArgumentException($"Unexpected symbol '{input[i]}'");
-                    }
-                    toReturn = _constNodes[LogicalSymbols.True];
-                }
-                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.LeftBracket][0])
-                {
-                    indent++;
 
-                    if (indent > 0)
-                    {
-                        i++;
-
-                        var newNode = BuildFormulaTree(input, ref i, toReturn);
-
-                        toReturn = newNode;
-                    }
-                }
-                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.RightBracket][0])
-                {
-                    indent--;
-
-                    // Stop parsing inner expression
-                    if (indent <= 0)
-                    {
-                        break;
-                    }
+                    toReturn = atomicFormulaNode;
                 }
 
                 // Encountered symbol is unary (negation) operator
-                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.Negation][0])
+                else if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.Negation][0])
                 {
-                    i++;
+                    if (toReturn is not null)
+                    {
+                        throw new ArgumentException($"Negation operator can't follow another operand ('{toReturn}')");
+                    }
 
-                    // Create object here to pass it as argument further. Child is set below
+                    refs.i++;
+
                     toReturn = new NegationNode(null);
-
-                    var childFormula = BuildFormulaTree(input, ref i, toReturn);
-
-                    toReturn.Left = childFormula;
+                    toReturn.Left = BuildFormulaTree(input, ref refs, toReturn);
 
                     break;
                 }
 
+                // Binary operators
                 else
                 {
-                    LogicalSymbols binaryOperator;
-
-                    switch (input[i])
-                    {
-                        case '\\':
-                            {
-                                if (i < input.Length - 1 && input[i + 1] == '/')
-                                {
-                                    binaryOperator = LogicalSymbols.Disjunction;
-                                    break;
-                                }
-                                else throw new ArgumentException($"Expected '{LogicalSymbols.Disjunction}'");
-                            }
-                        case '/':
-                            {
-                                if (i < input.Length - 1 && input[i + 1] == '\\')
-                                {
-                                    binaryOperator = LogicalSymbols.Conjunction;
-                                    break;
-                                }
-                                else throw new ArgumentException($"Expected '{LogicalSymbols.Conjunction}'");
-                            }
-                        case '-':
-                            {
-                                if (i < input.Length - 1 && input[i + 1] == '>')
-                                {
-                                    binaryOperator = LogicalSymbols.Implication;
-                                    break;
-                                }
-                                else throw new ArgumentException($"Expected '{LogicalSymbols.Implication}'");
-                            }
-                        case '~':
-                            {
-                                binaryOperator = LogicalSymbols.Equality;
-                                break;
-                            }
-                        default:
-                            {
-                                throw new ArgumentException($"Unexpected token '{input[i]}' in expression notation");
-                            }
-                    }
-
-
                     if (toReturn == null)
                     {
-                        string exceptionCommentary = input.Insert(i, "__?__");
-                        throw new ArgumentException($"Missing operand before '{input[i]}': {exceptionCommentary}");
+                        string exceptionCommentary = input.Insert(refs.i, "__?__");
+                        throw new ArgumentException($"Missing operand before '{input[refs.i]}': {exceptionCommentary}");
                     }
 
-                    i += LogicalSymbolsDict[binaryOperator].Length;
+                    LogicalSymbols binaryOperator;
+
+                    if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.Equality][0])
+                    {
+                        binaryOperator = LogicalSymbols.Equality;
+                    }
+                    else if (refs.i < input.Length - 1)
+                    {
+                        binaryOperator = input[refs.i] switch
+                        {
+                            '\\' when input[refs.i + 1] == '/' => LogicalSymbols.Disjunction,
+                            '/' when input[refs.i + 1] == '\\' => LogicalSymbols.Conjunction,
+                            '-' when input[refs.i + 1] == '>' => LogicalSymbols.Implication,
+                            _ => throw new ArgumentException($"Unexpected token '{input[refs.i]}' in expression notation")
+                        };
+                    }
+                    else throw new ArgumentException($"Unexpected token '{input[refs.i]}' in expression notation");
+
+                    refs.i += LogicalSymbolsDict[binaryOperator].Length;
 
                     var newNode = _binaryOperatorsNodes[binaryOperator](toReturn, null!);
 
@@ -185,15 +144,34 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 
                     toReturn = newNode;
 
-                    toReturn.Right = BuildFormulaTree(input, ref i, toReturn);
+                    toReturn.Right = BuildFormulaTree(input, ref refs, toReturn);
 
                     break;
                 }
             }
 
+            // Brackets validation
+            int bracketsCountDifference = refs.leftBracketsCount - refs.rightBracketsCount;
+            if (bracketsCountDifference != 0 && parentNode is null && refs.i == input.Length - 1)
+            {
+                throw new ArgumentException($"Invalid indentation ({Math.Abs(bracketsCountDifference)} brackets {(bracketsCountDifference > 0 ? "less" : "more")} than expected)");
+            }
+            //else if (toReturn is AtomicFormulaNode || toReturn is TrueNode || toReturn is FalseNode)
+            //{
+            //    if (refs.leftBracketsCount + refs.rightBracketsCount != 0)
+            //    {
+            //        throw new ArgumentException($"Invalid indentation (Simple formulas must not contain brackets)");
+            //    }
+            //}
+            //else if(refs.leftBracketsCount + refs.rightBracketsCount == 0)
+            //{
+            //    throw new ArgumentException($"Invalid indentation (Complex formulas must contain brackets)");
+            //}
+
+
             if (toReturn == null)
             {
-                string exceptionCommentary = input.Insert(i, "__?__");
+                string exceptionCommentary = input.Insert(refs.i, "__?__");
                 throw new ArgumentException($"Missing token in expression notation: {exceptionCommentary}");
             }
             toReturn.Parent = parentNode;
