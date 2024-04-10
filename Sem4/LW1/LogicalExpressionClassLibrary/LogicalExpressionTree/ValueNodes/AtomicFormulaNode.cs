@@ -1,5 +1,6 @@
 ﻿//
 // Лабораторная работа №1 по дисциплине "Логические основы интеллектуальных систем"
+// Вариант 5: Проверить, следует ли формула из заданной формулы сокращенного языка логики высказываний
 // Выполнили студенты группы 221701 БГУИР:
 // - Робилко Тимур Маркович
 // - Абушкевич Алексей Александрович
@@ -55,25 +56,9 @@ namespace LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes
 
         private static bool ValidateName(string name)
         {
-            // First symbol must be a letter
-            if (name.Length == 0 || !char.IsLetter(name[0]))
+            if (name.Length != 1 || !char.IsLetter(name[0]) || !char.IsUpper(name[0]))
             {
                 return false;
-            }
-            if (name.Length > 1)
-            {
-                if (name[1] == '0')
-                {
-                    return false;
-                }
-
-                for (int i = 1; i < name.Length; i++)
-                {
-                    if (!char.IsDigit(name[i]))
-                    {
-                        return false;
-                    }
-                }
             }
             return true;
         }

@@ -1,11 +1,12 @@
 ﻿//
 // Лабораторная работа №1 по дисциплине "Логические основы интеллектуальных систем"
+// Вариант 5: Проверить, следует ли формула из заданной формулы сокращенного языка логики высказываний
 // Выполнили студенты группы 221701 БГУИР:
 // - Робилко Тимур Маркович
 // - Абушкевич Алексей Александрович
 // 
 // Главный файл программы, отвечающий за пользовательский интерфейс
-// 27.03.2024
+// 10.04.2024
 //
 // Источники:
 // - Логические основы интеллектуальных систем. Практикум
@@ -15,12 +16,6 @@
 using LogicalExpressionClassLibrary;
 using System.Diagnostics.CodeAnalysis;
 using static LogicalExpressionClassLibrary.AppConstants;
-
-ConsoleLogger.DebugLevel =
-    ConsoleLogger.DebugLevels.Info
-    | ConsoleLogger.DebugLevels.Debug
-    | ConsoleLogger.DebugLevels.Error
-    | ConsoleLogger.DebugLevels.Warning;
 
 List<string> TestCases = [
     $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}B)",
@@ -92,7 +87,7 @@ void CheckKnowledge()
 
 while (true)
 {
-    Console.WriteLine("To check implication, press 1.\nTo check your knowledge, press 2.");
+    Console.WriteLine("To check consecution, press 1.\nTo check your knowledge, press 2.");
 
     switch (Console.ReadLine())
     {

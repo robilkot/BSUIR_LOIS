@@ -5,7 +5,7 @@
 // - Абушкевич Алексей Александрович
 // 
 // Класс парсера строковой записи логического выражения, использующий рекурсивный принцип работы
-// 27.03.2024
+// 10.04.2024
 //
 // Источники:
 // - Основы Алгоритмизации и Программирования (2 семестр). Практикум
@@ -21,33 +21,6 @@ namespace LogicalExpressionClassLibrary.LogicalParser
     public sealed class RecursiveLogicalParser : AbstractLogicalParser
     {
         private readonly Dictionary<string, List<AtomicFormulaNode>> _variables = [];
-        private static string ExtractVariableName(string input, ref int runningIndex)
-        {
-            int beginIndex = runningIndex;
-
-            // Account for letter-only atomic formulas
-            if (beginIndex == input.Length - 1)
-            {
-                return input[beginIndex..(beginIndex + 1)];
-            }
-
-            int endIndex = beginIndex;
-
-            if (input[++endIndex] == '0')
-            {
-                throw new ArgumentException("Atomic formula's first digit can't be zero");
-            }
-
-            while (endIndex < input.Length && char.IsDigit(input[endIndex]))
-            {
-                endIndex++;
-            }
-
-            // Account for outer increment in parser for loop
-            runningIndex = endIndex - 1;
-
-            return input[beginIndex..endIndex];
-        }
         public override (TreeNode, Dictionary<string, List<AtomicFormulaNode>>) Parse(string input)
         {
             _variables.Clear();
@@ -70,17 +43,17 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 // Encountered symbol is variable or const
                 if (char.IsLetter(input[i]))
                 {
-                    var variableName = ExtractVariableName(input, ref i);
+                    if (char.IsLower(input[i]))
+                    {
+                        throw new ArgumentException("Variable cannot have lowercase letter");
+                    }
+                    string variableName = input[i].ToString();
 
                     if (toReturn is not null)
                     {
                         throw new ArgumentException($"Unexpected variable '{variableName}' in expression notation");
                     }
 
-                    if (variableName.Length == 1 && Enum.IsDefined(typeof(LogicalSymbols), (int)variableName[0]))
-                    {
-                        toReturn = _constNodes[(LogicalSymbols)variableName[0]];
-                    }
                     else
                     {
                         var atomicFormulaNode = new AtomicFormulaNode(variableName);
@@ -98,7 +71,22 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                         toReturn = atomicFormulaNode;
                     }
                 }
-
+                else if(input[i] == LogicalSymbolsDict[LogicalSymbols.False][0])
+                {
+                    if (toReturn is not null)
+                    {
+                        throw new ArgumentException($"Unexpected symbol '{input[i]}'");
+                    }
+                    toReturn = _constNodes[LogicalSymbols.False];
+                }
+                else if (input[i] == LogicalSymbolsDict[LogicalSymbols.True][0])
+                {
+                    if (toReturn is not null)
+                    {
+                        throw new ArgumentException($"Unexpected symbol '{input[i]}'");
+                    }
+                    toReturn = _constNodes[LogicalSymbols.True];
+                }
                 else if (input[i] == LogicalSymbolsDict[LogicalSymbols.LeftBracket][0])
                 {
                     indent++;
