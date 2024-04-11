@@ -39,14 +39,14 @@ namespace LogicalExpressionUnitTest
     public class LogicalExpressionUnitTest
     {
         [Theory]
-        [InlineData("A123")]
+        [InlineData("A")]
         [InlineData("B")]
-        [InlineData("C1")]
-        [InlineData("((A1|(A2&A3))|B1)")]
-        [InlineData("((A1|F)|T)")]
-        [InlineData("(¬(¬A123))")]
-        [InlineData("(¬(¬(¬(¬A123))))")]
-        [InlineData("((A1|(B2&A3))|B1)")]
+        [InlineData("C")]
+        [InlineData("((A\/(B/\C))\/1)")]
+        [InlineData("((A\/0)\/1)")]
+        [InlineData("(!(!A))")]
+        [InlineData("(!(!(!(!A))))")]
+        [InlineData("((A\/(B/\C))\/D)")]
         public void RecursiveParsing_shouldEqual(string input)
         {
             LogicalExpression expr = new(input, new RecursiveLogicalParser());
@@ -54,59 +54,15 @@ namespace LogicalExpressionUnitTest
             Assert.Equal(input, expr.ToString());
         }
 
-        //[Theory]
-        //[InlineData("((A|B)&(¬C))", "(((((¬A)&B)&(¬C))|((A&(¬B))&(¬C)))|((A&B)&(¬C)))")]
-        //public void FDNF_shouldEqual(string input, string expected)
-        //{
-        //    LogicalExpression expr = new(input);
-
-        //    var FDNF = expr.FDNF;
-
-        //    Assert.Equal(expected, FDNF.ToString());
-        //}
-
-        //[Theory]
-        //[InlineData("((A|B)&(¬C))", "((((((A|B)|C)&((A|B)|(¬C)))&((A|(¬B))|(¬C)))&(((¬A)|B)|(¬C)))&(((¬A)|(¬B))|(¬C)))")]
-        //public void FCNF_shouldEqual(string input, string expected)
-        //{
-        //    LogicalExpression expr = new(input);
-
-        //    var FCNF = expr.FCNF;
-
-        //    Assert.Equal(expected, FCNF.ToString());
-        //}
-
-        //[Theory]
-        //[InlineData("((A|B)&(¬C))", "(7, 5, 3, 1, 0) &")]
-        //public void FCNFNumericString_shouldEqual(string input, string expected)
-        //{
-        //    LogicalExpression expr = new(input);
-
-        //    var FCNF = expr.FCNF.ToFCNFNumericString();
-
-        //    Assert.Equal(expected, FCNF);
-        //}
-
-        //[Theory]
-        //[InlineData("((A|B)&(¬C))", "(6, 4, 2) |")]
-        //public void FDNFNumericString_shouldEqual(string input, string expected)
-        //{
-        //    LogicalExpression expr = new(input);
-
-        //    var FDNF = expr.FDNF.ToFDNFNumericString();
-
-        //    Assert.Equal(expected, FDNF);
-        //}
-
         [Theory]
-        [InlineData("A123")]
+        [InlineData("A")]
         [InlineData("B")]
-        [InlineData("C1")]
-        [InlineData("((A1|(A2&A3))|B1)")]
-        [InlineData("((A1|F)|T)")]
-        [InlineData("(¬(¬A123))")]
-        [InlineData("(¬(¬(¬(¬A123))))")]
-        [InlineData("((A1|(B2&A3))|B1)")]
+        [InlineData("C")]
+        [InlineData("((A\/(B/\C))\/D)")]
+        [InlineData("((A\/0)\/1)")]
+        [InlineData("(!(!A))")]
+        [InlineData("(!(!(!(!A))))")]
+        [InlineData("((A\/(B/\C))\/D)")]
         public void GetTruthTable_shouldNotThrow(string input)
         {
             LogicalExpression expr = new(input);
@@ -116,24 +72,24 @@ namespace LogicalExpressionUnitTest
         }
 
         [Theory]
-        [InlineData("((A1|A2)|A3)", true, true, true, true)]
-        [InlineData("((A1|A2)|A3)", false, false, false, false)]
-        [InlineData("((A1&A2)|A3)", false, false, true, true)]
-        [InlineData("((A1&A2)|A3)", true, true, false, true)]
-        [InlineData("((A1&A2)&A3)", true, false, false, false)]
-        [InlineData("((A1&A2)&A3)", true, true, true, true)]
-        [InlineData("((A1→A2)&A3)", true, false, true, false)]
-        [InlineData("((A1→A2)&A3)", false, false, true, true)]
-        [InlineData("((A1&A2)~A3)", true, true, true, true)]
-        [InlineData("((A1&A2)~A3)", false, false, false, true)]
-        [InlineData("((¬A1)&A2)|A3)", false, true, false, true)]
-        [InlineData("((¬A1)&A2)|A3)", true, true, false, false)]
-        public void Evaluation_shouldEqualExprected(string input, bool A1, bool A2, bool A3, bool result)
+        [InlineData("((A\/B)\/C)", true, true, true, true)]
+        [InlineData("((A\/B)\/C)", false, false, false, false)]
+        [InlineData("((A/\D)\/C)", false, false, true, true)]
+        [InlineData("((A/\E)\/C)", true, true, false, true)]
+        [InlineData("((A/\A)/\C)", true, false, false, false)]
+        [InlineData("((A/\B)/\C)", true, true, true, true)]
+        [InlineData("((A->B)/\C)", true, false, true, false)]
+        [InlineData("((A->B)/\C)", false, false, true, true)]
+        [InlineData("((A/\B)~C)", true, true, true, true)]
+        [InlineData("((A/\B)~C)", false, false, false, true)]
+        [InlineData("((¬D)/\E)\/F)", false, true, false, true)]
+        [InlineData("((¬A)/\B)\/C)", true, true, false, false)]
+        public void Evaluation_shouldEqualExprected(string input, bool A, bool B, bool C, bool result)
         {
             LogicalExpression expr = new(input);
-            expr.SetVariable("A1", A1);
-            expr.SetVariable("A2", A2);
-            expr.SetVariable("A3", A3);
+            expr.SetVariable("A", A);
+            expr.SetVariable("B", B);
+            expr.SetVariable("C", C);
 
             var actualResult = expr.Evaluation;
 
@@ -142,12 +98,12 @@ namespace LogicalExpressionUnitTest
 
         [Theory]
         [InlineData("(1)")]
-        [InlineData("(A023)")]
+        [InlineData("(A)")]
         [InlineData("(A1B)")]
-        [InlineData("(A1=B1)")]
-        [InlineData("(A1&)")]
-        [InlineData("(¬)")]
-        [InlineData("(A1&(|C1))")]
+        [InlineData("(A=B1)")]
+        [InlineData("(AB&)")]
+        [InlineData("(!)")]
+        [InlineData("(A/\(\/C))")]
         public void Parsing_IncorrectNotation_shouldThrow(string input)
         {
             Assert.Throws<ArgumentException>(() => new LogicalExpression(input));
@@ -156,13 +112,13 @@ namespace LogicalExpressionUnitTest
         [Fact]
         public void SettingVariable_VariableChangesValue_ShouldResetEvaluation()
         {
-            LogicalExpression expr = new("((A1&A2)~A3)");
-            expr.SetVariable("A1", true);
-            expr.SetVariable("A2", false);
-            expr.SetVariable("A3", false);
+            LogicalExpression expr = new("((A/\B)~C)");
+            expr.SetVariable("A", true);
+            expr.SetVariable("B", false);
+            expr.SetVariable("C", false);
             var oldResult = expr.Evaluation;
 
-            expr.SetVariable("A2", true);
+            expr.SetVariable("B", true);
 
             Assert.NotEqual(oldResult, expr.Evaluation);
         }

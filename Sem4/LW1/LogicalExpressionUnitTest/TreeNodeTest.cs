@@ -23,7 +23,7 @@ namespace LogicalExpressionUnitTest
     public class TreeNodeTest
     {
         [Theory]
-        [InlineData("A023")]
+        [InlineData("A0")]
         [InlineData("1B")]
         [InlineData("")]
         [InlineData("(")]
