@@ -74,22 +74,24 @@ namespace LogicalExpressionUnitTest
         [Theory]
         [InlineData("((A\/B)\/C)", true, true, true, true)]
         [InlineData("((A\/B)\/C)", false, false, false, false)]
-        [InlineData("((A/\D)\/C)", false, false, true, true)]
-        [InlineData("((A/\E)\/C)", true, true, false, true)]
+        [InlineData("((A/\C)\/C)", false, false, true, true)]
+        [InlineData("((A/\B)\/C)", true, true, false, true)]
         [InlineData("((A/\A)/\C)", true, false, false, false)]
         [InlineData("((A/\B)/\C)", true, true, true, true)]
         [InlineData("((A->B)/\C)", true, false, true, false)]
         [InlineData("((A->B)/\C)", false, false, true, true)]
         [InlineData("((A/\B)~C)", true, true, true, true)]
         [InlineData("((A/\B)~C)", false, false, false, true)]
-        [InlineData("((¬D)/\E)\/F)", false, true, false, true)]
-        [InlineData("((¬A)/\B)\/C)", true, true, false, false)]
-        public void Evaluation_shouldEqualExprected(string input, bool A, bool B, bool C, bool result)
+        [InlineData("((!B)/\E)\/F)", false, true, false, true)]
+        [InlineData("((!A)/\B)\/C)", true, true, false, false)]
+        public void Evaluation_shouldEqualExprected(string input, bool A, bool B, bool C,bool E, bool F, bool result)
         {
             LogicalExpression expr = new(input);
             expr.SetVariable("A", A);
             expr.SetVariable("B", B);
             expr.SetVariable("C", C);
+            expr.SetVariable("E", E);
+            expr.SetVariable("F", F);
 
             var actualResult = expr.Evaluation;
 
@@ -104,6 +106,19 @@ namespace LogicalExpressionUnitTest
         [InlineData("(AB&)")]
         [InlineData("(!)")]
         [InlineData("(A/\(\/C))")]
+        [InlineData("(1_0_\(\/?))")]
+        [InlineData("(A/\B/\C))))))))))))))))")]
+        [InlineData("A()C")]
+        [InlineData("1?__)")]
+        [InlineData("A->B->C->D->E->F->G->H->I")]
+        [InlineData("(A->B->C->D->E->F->(G->H)->I)")]
+        [InlineData("A/\B/\C/\D/\E/\F/\G/\H/\I/\И/\К\/О/\П")]
+        [InlineData("(0)")]
+        [InlineData("(G)")]
+        [InlineData("(AG)")]
+        [InlineData("(A->B1234567)")]
+        [InlineData("(AB/\&&C)")]
+
         public void Parsing_IncorrectNotation_shouldThrow(string input)
         {
             Assert.Throws<ArgumentException>(() => new LogicalExpression(input));
