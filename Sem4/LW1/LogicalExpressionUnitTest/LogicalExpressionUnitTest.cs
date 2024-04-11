@@ -150,5 +150,27 @@ namespace LogicalExpressionUnitTest
 
             Assert.NotEqual(oldResult, expr.Evaluation);
         }
+
+
+        [Theory]
+        [InlineData("A", "B", false)]
+        [InlineData("(A->B)", "((!A)\\/B)", true)]
+        [InlineData("A", "A", true)]
+        [InlineData("(A->B)", "((!B)->(!A))", true)]
+        [InlineData("(A->B)", "((!B)->A)", false)]
+        [InlineData("(A/\\B)", "A", true)]
+        [InlineData("((A/\\B)->C)", "(A->(B->C))", true)]
+        [InlineData("((A->B)/\\(B->C))", "(A->C)", true)]
+        [InlineData("(A/\\(B\\/C))", "((A/\\B)\\/(A/\\C))", true)]
+        [InlineData("(A->(B/\\C))", "((A/\\B)\\/(A/\\C))", false)]
+        [InlineData("(A->(B/\\C))", "((A->B)/\\(A->C))", true)]
+        public void ImpliesFrom_GivenCorrectData_ResultShouldEqual(string first_formula, string second_formula, bool result)
+        {
+            LogicalExpression expr1 = new(first_formula);
+            LogicalExpression expr2 = new(second_formula);
+            bool actualResult = expr2.ImpliesFrom(expr1);
+            Assert.Equal(result, actualResult);
+        }
+
     }
 }
