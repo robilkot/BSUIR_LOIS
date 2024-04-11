@@ -82,16 +82,14 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A->B)/\C)", false, false, true, true)]
         [InlineData("((A/\B)~C)", true, true, true, true)]
         [InlineData("((A/\B)~C)", false, false, false, true)]
-        [InlineData("((!B)/\E)\/F)", false, true, false, true)]
+        [InlineData("((!B)/\A)\/C)", false, true, false, true)]
         [InlineData("((!A)/\B)\/C)", true, true, false, false)]
-        public void Evaluation_shouldEqualExprected(string input, bool A, bool B, bool C,bool E, bool F, bool result)
+        public void Evaluation_shouldEqualExprected(string input, bool A, bool B, bool C, bool result)
         {
             LogicalExpression expr = new(input);
             expr.SetVariable("A", A);
             expr.SetVariable("B", B);
             expr.SetVariable("C", C);
-            expr.SetVariable("E", E);
-            expr.SetVariable("F", F);
 
             var actualResult = expr.Evaluation;
 
