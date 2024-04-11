@@ -5,7 +5,7 @@
 // - Абушкевич Алексей Александрович
 // 
 // Класс парсера строковой записи логического выражения, использующий рекурсивный принцип работы
-// 10.04.2024
+// 11.04.2024
 //
 // Источники:
 // - Основы Алгоритмизации и Программирования (2 семестр). Практикум
@@ -25,14 +25,22 @@ namespace LogicalExpressionClassLibrary.LogicalParser
         {
             _variables.Clear();
 
-            (int i, int leftBracketsCount, int rightBracketsCount) refs = (0, 0, 0);
+            (int i, int leftBracketsCount, int rightBracketsCount, bool inBinaryFormula, int operatorsCount) refs = (0, 0, 0, false, 0);
 
             var root = BuildFormulaTree(input, ref refs, null);
+
+            int expectedBracketsPairsCount = refs.operatorsCount;
+
+            if(refs.rightBracketsCount != expectedBracketsPairsCount 
+                || refs.leftBracketsCount != expectedBracketsPairsCount)
+            {
+                throw new ArgumentException("Invalid brackets count");
+            }
 
             return (root, new(_variables));
         }
 
-        private TreeNode BuildFormulaTree(string input, ref (int i, int leftBracketsCount, int rightBracketsCount) refs, TreeNode? parentNode)
+        private TreeNode BuildFormulaTree(string input, ref (int i, int leftBracketsCount, int rightBracketsCount, bool inBinaryFormula, int operatorsCount) refs, TreeNode? parentNode)
         {
             TreeNode toReturn = null!;
 
@@ -40,6 +48,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
             {
                 if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.LeftBracket][0])
                 {
+                    refs.inBinaryFormula = false;
                     refs.leftBracketsCount++;
                     refs.i++;
 
@@ -47,6 +56,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 }
                 else if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.RightBracket][0])
                 {
+                    refs.inBinaryFormula = false;
                     refs.rightBracketsCount++;
                     break;
                 }
@@ -76,7 +86,6 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     }
 
                     string variableName = input[refs.i].ToString();
-                    //refs.i++;
 
                     var atomicFormulaNode = new AtomicFormulaNode(variableName);
 
@@ -91,6 +100,9 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     }
 
                     toReturn = atomicFormulaNode;
+
+                    // no need to increment since we are in for loop already
+                    // refs.i++;
                 }
 
                 // Encountered symbol is unary (negation) operator
@@ -106,6 +118,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     toReturn = new NegationNode(null);
                     toReturn.Left = BuildFormulaTree(input, ref refs, toReturn);
 
+                    refs.operatorsCount++;
                     break;
                 }
 
@@ -116,6 +129,11 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     {
                         string exceptionCommentary = input.Insert(refs.i, "__?__");
                         throw new ArgumentException($"Missing operand before '{input[refs.i]}': {exceptionCommentary}");
+                    }
+                    else if (refs.inBinaryFormula)
+                    {
+                        string exceptionCommentary = input.Insert(refs.i, "__?__");
+                        throw new ArgumentException($"Missing brackets: {exceptionCommentary}");
                     }
 
                     LogicalSymbols binaryOperator;
@@ -144,38 +162,22 @@ namespace LogicalExpressionClassLibrary.LogicalParser
 
                     toReturn = newNode;
 
+                    refs.inBinaryFormula = true;
+
                     toReturn.Right = BuildFormulaTree(input, ref refs, toReturn);
 
+                    refs.operatorsCount++;
                     break;
                 }
             }
-
-            // Brackets validation
-            int bracketsCountDifference = refs.leftBracketsCount - refs.rightBracketsCount;
-            if (bracketsCountDifference != 0 && parentNode is null && refs.i == input.Length - 1)
-            {
-                throw new ArgumentException($"Invalid indentation ({Math.Abs(bracketsCountDifference)} brackets {(bracketsCountDifference > 0 ? "less" : "more")} than expected)");
-            }
-            //else if (toReturn is AtomicFormulaNode || toReturn is TrueNode || toReturn is FalseNode)
-            //{
-            //    if (refs.leftBracketsCount + refs.rightBracketsCount != 0)
-            //    {
-            //        throw new ArgumentException($"Invalid indentation (Simple formulas must not contain brackets)");
-            //    }
-            //}
-            //else if(refs.leftBracketsCount + refs.rightBracketsCount == 0)
-            //{
-            //    throw new ArgumentException($"Invalid indentation (Complex formulas must contain brackets)");
-            //}
-
 
             if (toReturn == null)
             {
                 string exceptionCommentary = input.Insert(refs.i, "__?__");
                 throw new ArgumentException($"Missing token in expression notation: {exceptionCommentary}");
             }
-            toReturn.Parent = parentNode;
 
+            toReturn.Parent = parentNode;
             return toReturn;
         }
     }

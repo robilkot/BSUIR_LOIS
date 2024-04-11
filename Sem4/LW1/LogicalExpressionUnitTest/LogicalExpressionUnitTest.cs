@@ -5,7 +5,7 @@
 // - Абушкевич Алексей Александрович
 // 
 // Класс для хранения unit-тестов, относящихся к классу LogicalExpression
-// 30.02.2024
+// 11.04.2024
 //
 // Источники:
 // - Проектирование программного обеспечения интеллектуальных систем (3 семестр)
@@ -42,11 +42,12 @@ namespace LogicalExpressionUnitTest
         [InlineData("A")]
         [InlineData("B")]
         [InlineData("C")]
-        [InlineData("((A\/(B/\C))\/1)")]
-        [InlineData("((A\/0)\/1)")]
+        [InlineData("((A\\/(B/\\C))\\/1)")]
+        [InlineData("((A\\/0)\\/1)")]
         [InlineData("(!(!A))")]
         [InlineData("(!(!(!(!A))))")]
-        [InlineData("((A\/(B/\C))\/D)")]
+        [InlineData("((A\\/(B/\\C))\\/D)")]
+        [InlineData("(((!A)/\\B)\\/C)")]
         public void RecursiveParsing_shouldEqual(string input)
         {
             LogicalExpression expr = new(input, new RecursiveLogicalParser());
@@ -58,11 +59,10 @@ namespace LogicalExpressionUnitTest
         [InlineData("A")]
         [InlineData("B")]
         [InlineData("C")]
-        [InlineData("((A\/(B/\C))\/D)")]
-        [InlineData("((A\/0)\/1)")]
+        [InlineData("((A\\/(B/\\C))\\/D)")]
+        [InlineData("((A\\/0)\\/1)")]
         [InlineData("(!(!A))")]
         [InlineData("(!(!(!(!A))))")]
-        [InlineData("((A\/(B/\C))\/D)")]
         public void GetTruthTable_shouldNotThrow(string input)
         {
             LogicalExpression expr = new(input);
@@ -72,18 +72,18 @@ namespace LogicalExpressionUnitTest
         }
 
         [Theory]
-        [InlineData("((A\/B)\/C)", true, true, true, true)]
-        [InlineData("((A\/B)\/C)", false, false, false, false)]
-        [InlineData("((A/\C)\/C)", false, false, true, true)]
-        [InlineData("((A/\B)\/C)", true, true, false, true)]
-        [InlineData("((A/\A)/\C)", true, false, false, false)]
-        [InlineData("((A/\B)/\C)", true, true, true, true)]
-        [InlineData("((A->B)/\C)", true, false, true, false)]
-        [InlineData("((A->B)/\C)", false, false, true, true)]
-        [InlineData("((A/\B)~C)", true, true, true, true)]
-        [InlineData("((A/\B)~C)", false, false, false, true)]
-        [InlineData("((!B)/\A)\/C)", false, true, false, true)]
-        [InlineData("((!A)/\B)\/C)", true, true, false, false)]
+        [InlineData("((A\\/B)\\/C)", true, true, true, true)]
+        [InlineData("((A\\/B)\\/C)", false, false, false, false)]
+        [InlineData("((A/\\B)\\/C)", false, false, true, true)]
+        [InlineData("((A/\\B)\\/C)", true, true, false, true)]
+        [InlineData("((A/\\B)/\\C)", true, false, false, false)]
+        [InlineData("((A/\\B)/\\C)", true, true, true, true)]
+        [InlineData("((A->B)/\\C)", true, false, true, false)]
+        [InlineData("((A->B)/\\C)", false, false, true, true)]
+        [InlineData("((A/\\B)~C)", true, true, true, true)]
+        [InlineData("((A/\\B)~C)", false, false, false, true)]
+        [InlineData("(((!B)/\\A)\\/C)", false, true, false, false)]
+        [InlineData("(((!A)/\\B)\\/C)", true, true, false, false)]
         public void Evaluation_shouldEqualExprected(string input, bool A, bool B, bool C, bool result)
         {
             LogicalExpression expr = new(input);
@@ -97,25 +97,40 @@ namespace LogicalExpressionUnitTest
         }
 
         [Theory]
-        [InlineData("(1)")]
+        [InlineData("a")]
         [InlineData("(A)")]
         [InlineData("(A1B)")]
         [InlineData("(A=B1)")]
         [InlineData("(AB&)")]
         [InlineData("(!)")]
-        [InlineData("(A/\(\/C))")]
-        [InlineData("(1_0_\(\/?))")]
-        [InlineData("(A/\B/\C))))))))))))))))")]
+        [InlineData("(A!B)")]
+        [InlineData("(A/\\(\\/C))")]
+        [InlineData("(1_0_\\(\\/?))")]
+        [InlineData("(A/\\B/\\C))))))))))))))))")]
         [InlineData("A()C")]
-        [InlineData("1?__)")]
-        [InlineData("A->B->C->D->E->F->G->H->I")]
-        [InlineData("(A->B->C->D->E->F->(G->H)->I)")]
-        [InlineData("A/\B/\C/\D/\E/\F/\G/\H/\I/\И/\К\/О/\П")]
+        [InlineData("A->B->C->D")]
+        [InlineData("A->B")]
+        [InlineData("(A->B->C->(G->H)->I)")]
+        [InlineData("A/\\B/\\C/\\D/\\E/\\F/\\G/\\H/\\I")]
         [InlineData("(0)")]
-        [InlineData("(G)")]
         [InlineData("(AG)")]
-        [InlineData("(A->B1234567)")]
-        [InlineData("(AB/\&&C)")]
+        [InlineData("(A->B123)")]
+        [InlineData("(AB/\\&&C)")]
+        [InlineData("(A->(A))")]
+        [InlineData("((A)->A)")]
+        [InlineData("((A)->(A))")]
+        [InlineData("(A")]
+        [InlineData("A))")]
+        [InlineData("A->B))")]
+        [InlineData("(A->B))")]
+        [InlineData("((A->B")]
+        [InlineData("A->(B(C))")]
+        [InlineData("(A->B)->C")]
+        [InlineData("A->B)->C")]
+        [InlineData("A->B)->C)")]
+        [InlineData("((A->B->C))")]
+        [InlineData("((A->B->C)))))->)")]
+        [InlineData("(((A->B)->C->D)))")]
 
         public void Parsing_IncorrectNotation_shouldThrow(string input)
         {
@@ -125,7 +140,7 @@ namespace LogicalExpressionUnitTest
         [Fact]
         public void SettingVariable_VariableChangesValue_ShouldResetEvaluation()
         {
-            LogicalExpression expr = new("((A/\B)~C)");
+            LogicalExpression expr = new("((A/\\B)~C)");
             expr.SetVariable("A", true);
             expr.SetVariable("B", false);
             expr.SetVariable("C", false);
