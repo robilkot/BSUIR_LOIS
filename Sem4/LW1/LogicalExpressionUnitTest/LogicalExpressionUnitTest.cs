@@ -13,7 +13,6 @@
 //
 
 using LogicalExpressionClassLibrary;
-using LogicalExpressionClassLibrary.LogicalExpressionTree;
 using LogicalExpressionClassLibrary.LogicalParser;
 using System.Diagnostics.CodeAnalysis;
 
@@ -72,6 +71,30 @@ namespace LogicalExpressionUnitTest
         }
 
         [Theory]
+        [InlineData("A", "A")]
+        [InlineData("B", "B")]
+        [InlineData("C", "C")]
+        public void GetVariable_shouldReturnFalseByDefault(string input, string variable)
+        {
+            LogicalExpression expr = new(input);
+
+            bool result = expr.GetVariable(variable);
+
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("A", "X")]
+        [InlineData("B", "X")]
+        [InlineData("C", "X")]
+        public void GetVariable_UninitializedVariable_ShouldThrow(string input, string variable)
+        {
+            LogicalExpression expr = new(input);
+
+            Assert.Throws<ArgumentException>(() => expr.GetVariable(variable));
+        }
+
+        [Theory]
         [InlineData("((A\\/B)\\/C)", true, true, true, true)]
         [InlineData("((A\\/B)\\/C)", false, false, false, false)]
         [InlineData("((A/\\B)\\/C)", false, false, true, true)]
@@ -97,6 +120,7 @@ namespace LogicalExpressionUnitTest
         }
 
         [Theory]
+        [InlineData("")]
         [InlineData("a")]
         [InlineData("(A)")]
         [InlineData("(A1B)")]

@@ -24,10 +24,10 @@ ConsoleLogger.DebugLevel =
     ConsoleLogger.DebugLevels.Info;
 
 List<string> TestCases = [
+    $"A",
     $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}B)",
-    $"(A)",
-    $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}(B{LogicalSymbolsDict[LogicalSymbols.Disjunction]}C))",
     $"(B{LogicalSymbolsDict[LogicalSymbols.Conjunction]}C)",
+    $"(A{LogicalSymbolsDict[LogicalSymbols.Conjunction]}(B{LogicalSymbolsDict[LogicalSymbols.Disjunction]}C))",
     $"(A{LogicalSymbolsDict[LogicalSymbols.Implication]}(B{LogicalSymbolsDict[LogicalSymbols.Equality]}C))",
     $"(({LogicalSymbolsDict[LogicalSymbols.Negation]}B){LogicalSymbolsDict[LogicalSymbols.Conjunction]}C)",
     $"(({LogicalSymbolsDict[LogicalSymbols.Negation]}A){LogicalSymbolsDict[LogicalSymbols.Disjunction]}C)",
@@ -45,7 +45,7 @@ void InputExpression(out LogicalExpression expr)
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            ConsoleLogger.Log(e.Message, ConsoleLogger.DebugLevels.Error);
             Console.WriteLine("Please, re-input expression");
         }
     }
@@ -86,14 +86,10 @@ void CheckKnowledge()
     else
     {
         Console.WriteLine("\nIncorrect! Compare truth tables to find out why:");
-        //Console.WriteLine(expr1.ToTruthTableString());
-        //Console.WriteLine(expr2.ToTruthTableString());
+        Console.WriteLine(expr1.ToTruthTableString());
+        Console.WriteLine(expr2.ToTruthTableString());
     };
 }
-//while (true)
-//{
-//    CheckImplication();
-//}
 
 Benchmarks.Execute();
 

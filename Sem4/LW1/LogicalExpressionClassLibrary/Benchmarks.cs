@@ -34,16 +34,27 @@ namespace LogicalExpressionClassLibrary
             Stopwatch sw = new();
 
             List<int> cases = [1, 4, 7, 10, 15, 20, 23, 26];
-            
+            //List<int> cases = [1, 4, 7, 10, 15, 20];
+
             foreach (int testCase in cases)
             {
-                LogicalExpression expr0 = new(BuildTest(testCase, LogicalSymbols.Conjunction));
+                LogicalExpression expr0 = new(BuildTest(testCase, LogicalSymbols.Implication));
                 LogicalExpression expr1 = new(BuildTest(testCase, LogicalSymbols.Equality));
 
+                string str0 = expr0.ToString();
+                string str1 = expr1.ToString();
+
+                //sw.Restart();
+                //bool resultNaive = new LogicalExpression($"({str1}->{str0})").IsTautology();
+                ////Console.WriteLine($"{str0} " + (resultNaive ? "implies" : "doesn't imply") + $" from {str1}");
+                //sw.Stop();
+                //Console.WriteLine($"{testCase} VARIABLES. NAIVE - ELAPSED {sw.Elapsed}");
+
                 sw.Restart();
-                Console.WriteLine($"{expr0} " + (expr0.ImpliesFrom(expr1) ? "implies" : "doesn't imply") + $" from {expr1}");
+                bool resultGood = expr0.ImpliesFrom(expr1);
+                Console.WriteLine($"{str0} " + (resultGood ? "implies" : "doesn't imply") + $" from {str1}");
                 sw.Stop();
-                Console.WriteLine($"{testCase} VARIABLES. ELAPSED {sw.Elapsed}");
+                Console.WriteLine($"{testCase} variables. Elapsed {sw.Elapsed}");
             }
         }
     }

@@ -17,7 +17,6 @@ using LogicalExpressionClassLibrary.LogicalExpressionTree.OperationNodes;
 using LogicalExpressionClassLibrary.LogicalExpressionTree.ValueNodes;
 using LogicalExpressionClassLibrary.LogicalParser;
 using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using static LogicalExpressionClassLibrary.AppConstants;
@@ -78,7 +77,6 @@ namespace LogicalExpressionClassLibrary
         }
         private List<Dictionary<string, bool>> BuildTruthTable()
         {
-
             List<Dictionary<string, bool>> truthTable = [];
 
             // Preserve initial state before checking all combinations of variables
@@ -187,12 +185,6 @@ namespace LogicalExpressionClassLibrary
 
             return builder.ToString();
         }
-        public bool IsTautology()
-        {
-            string currentExpressionNotation = ToString();
-
-            return !TruthTable.Any(row => row[currentExpressionNotation] == false);
-        }
         public bool ImpliesFrom(LogicalExpression source)
         {
             LogicalExpression implication = new();
@@ -254,7 +246,7 @@ namespace LogicalExpressionClassLibrary
                     resultBoolean = false;
                     break;
                 }
-                
+
                 NextCombination(variablesTruthMask);
             }
             while (variablesTruthMask.HasAnySet());
