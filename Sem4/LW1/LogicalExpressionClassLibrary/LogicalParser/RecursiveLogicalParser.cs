@@ -25,27 +25,46 @@ namespace LogicalExpressionClassLibrary.LogicalParser
         {
             _variables.Clear();
 
-            (int i, int leftBracketsCount, int rightBracketsCount, bool inBinaryFormula, int operatorsCount) refs = (0, 0, 0, false, 0);
+            (
+                int i, 
+                int leftBracketsCount, 
+                int rightBracketsCount, 
+                bool inBinaryFormula, 
+                int operatorsCount, 
+                bool finishedParsing) refs 
+                = (0, 0, 0, false, 0, false);
 
             var root = BuildFormulaTree(input, ref refs, null);
 
             int expectedBracketsPairsCount = refs.operatorsCount;
 
-            if(refs.rightBracketsCount != expectedBracketsPairsCount 
+            if (refs.rightBracketsCount != expectedBracketsPairsCount
                 || refs.leftBracketsCount != expectedBracketsPairsCount)
             {
                 throw new ArgumentException("Invalid brackets count");
             }
 
+            if (refs.i < input.Length - 1)
+            {
+                throw new ArgumentException("Odd part of expression encountered");
+            }
+
             return (root, new(_variables));
         }
 
-        private TreeNode BuildFormulaTree(string input, ref (int i, int leftBracketsCount, int rightBracketsCount, bool inBinaryFormula, int operatorsCount) refs, TreeNode? parentNode)
+        private TreeNode BuildFormulaTree(
+            string input, 
+            ref (int i, int leftBracketsCount, int rightBracketsCount, bool inBinaryFormula, int operatorsCount, bool finishedParsing) refs, 
+            TreeNode? parentNode)
         {
             TreeNode toReturn = null!;
 
             for (; refs.i < input.Length; refs.i++)
             {
+                if(refs.finishedParsing)
+                {
+                    FinishParsing(toReturn, parentNode, input, refs.i);
+                }
                 if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.LeftBracket][0])
                 {
                     refs.inBinaryFormula = false;
@@ -58,6 +77,11 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 {
                     refs.inBinaryFormula = false;
                     refs.rightBracketsCount++;
+
+                    if(refs.rightBracketsCount == refs.leftBracketsCount)
+                    {
+                        refs.finishedParsing = true;
+                    }
                     break;
                 }
                 else if (input[refs.i] == LogicalSymbolsDict[LogicalSymbols.False][0])
@@ -163,7 +187,7 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                     toReturn = newNode;
 
                     refs.inBinaryFormula = true;
-
+                    
                     toReturn.Right = BuildFormulaTree(input, ref refs, toReturn);
 
                     refs.operatorsCount++;
@@ -171,13 +195,18 @@ namespace LogicalExpressionClassLibrary.LogicalParser
                 }
             }
 
+            return FinishParsing(toReturn, parentNode, input, refs.i);
+        }
+
+        private TreeNode FinishParsing(TreeNode toReturn, TreeNode? parent, string input, int i)
+        {
             if (toReturn == null)
             {
-                string exceptionCommentary = input.Insert(refs.i, "__?__");
+                string exceptionCommentary = input.Insert(i, "__?__");
                 throw new ArgumentException($"Missing token in expression notation: {exceptionCommentary}");
             }
 
-            toReturn.Parent = parentNode;
+            toReturn.Parent = parent;
             return toReturn;
         }
     }

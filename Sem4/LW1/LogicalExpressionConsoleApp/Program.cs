@@ -91,7 +91,7 @@ void CheckKnowledge()
     };
 }
 
-Benchmarks.Execute();
+//Benchmarks.Execute();
 
 while (true)
 {

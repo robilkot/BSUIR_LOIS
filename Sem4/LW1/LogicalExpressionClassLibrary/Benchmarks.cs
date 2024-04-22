@@ -34,8 +34,7 @@ namespace LogicalExpressionClassLibrary
             Stopwatch sw = new();
 
             List<int> cases = [1, 4, 7, 10, 15, 20, 23, 26];
-            //List<int> cases = [1, 4, 7, 10, 15, 20];
-
+            
             foreach (int testCase in cases)
             {
                 LogicalExpression expr0 = new(BuildTest(testCase, LogicalSymbols.Implication));
@@ -44,12 +43,14 @@ namespace LogicalExpressionClassLibrary
                 string str0 = expr0.ToString();
                 string str1 = expr1.ToString();
 
+                // Naive approach
                 //sw.Restart();
                 //bool resultNaive = new LogicalExpression($"({str1}->{str0})").IsTautology();
                 ////Console.WriteLine($"{str0} " + (resultNaive ? "implies" : "doesn't imply") + $" from {str1}");
                 //sw.Stop();
                 //Console.WriteLine($"{testCase} VARIABLES. NAIVE - ELAPSED {sw.Elapsed}");
 
+                // Optimized approach
                 sw.Restart();
                 bool resultGood = expr0.ImpliesFrom(expr1);
                 Console.WriteLine($"{str0} " + (resultGood ? "implies" : "doesn't imply") + $" from {str1}");

@@ -155,7 +155,8 @@ namespace LogicalExpressionUnitTest
         [InlineData("((A->B->C))")]
         [InlineData("((A->B->C)))))->)")]
         [InlineData("(((A->B)->C->D)))")]
-
+        [InlineData("(A->B)(!C)")]
+        [InlineData("((A->(B->C)->D))")]
         public void Parsing_IncorrectNotation_shouldThrow(string input)
         {
             Assert.Throws<ArgumentException>(() => new LogicalExpression(input));
