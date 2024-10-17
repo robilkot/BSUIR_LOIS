@@ -14,16 +14,7 @@ namespace LW1.Parsing
             };
 
         private static Fact VisitFactInternal(FuzzyLogicParser.FactContext context)
-        {
-            var newFact = new Fact(context.ID().ToString()!);
-
-            newFact.AddRange(
-                context.pair()
-                    .Select(pair => ($"{pair.ID()}", double.Parse($"{pair.FLOAT()}")))
-            );
-
-            return newFact;
-        }
+            => new ($"{context.ID()}", context.pair().Select(p => ($"{p.ID()}", double.Parse($"{p.FLOAT()}"))));
 
         private static Rule VisitRuleInternal(FuzzyLogicParser.RuleContext context)
             => new($"{context.ID()[0]}", $"{context.ID()[1]}");
