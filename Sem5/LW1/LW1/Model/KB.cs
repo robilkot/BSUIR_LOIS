@@ -14,11 +14,24 @@
 // - Getting Started With ANTLR in C# / https://tomassetti.me/getting-started-with-antlr-in-csharp/
 //
 
+using System.Collections;
+
 namespace LW1.Model
 {
-    public class KB
+    public class KB : IEnumerable<string>
     {
         public List<Fact> Facts { get; set; } = [];
         public List<Rule> Rules { get; set; } = [];
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            foreach (var fact in Facts)
+                yield return $"{fact}";
+
+            foreach (var fact in Rules)
+                yield return $"{fact}";
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

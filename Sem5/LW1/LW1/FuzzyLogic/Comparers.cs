@@ -5,7 +5,7 @@
 // - Робилко Тимур Маркович
 // - Абушкевич Алексей Александрович
 // 
-// Классы, отвечающие за сравнение нечётких множеств: по носителю и по содержанию множеств
+// Классы, отвечающие за сравнение нечётких множеств по их содержанию
 // 18.10.2024
 //
 // Источники:
@@ -18,20 +18,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace LW1.FuzzyLogic.Comparers
 {
-    public class SupportComparer : IEqualityComparer<(string Idtf, double Value)>
-    {
-        public bool Equals((string Idtf, double Value) x, (string Idtf, double Value) y)
-            => x.Idtf.Equals(y.Idtf);
-
-        public int GetHashCode([DisallowNull] (string Idtf, double Value) obj)
-            => obj.Idtf.GetHashCode();
-    }
     public class ContentComparer : IEqualityComparer<Fact>
     {
         public bool Equals(Fact? x, Fact? y)
-            => x?.SequenceEqual(y) ?? false;
+            => y is not null 
+            && x is not null 
+            && x.All(kvp => y.TryGetValue(kvp.Key, out var comp) && comp == kvp.Value) 
+            && x.Count == y.Count;
 
-        public int GetHashCode([DisallowNull] Fact obj)
-            => obj.GetHashCode();
+        public int GetHashCode([DisallowNull] Fact obj) => obj.GetHashCode();
     }
 }

@@ -22,14 +22,13 @@ namespace LW1.FuzzyLogic
 {
     public static class Inference
     {
-        private static readonly SupportComparer s_supportComparer = new();
         private static readonly ContentComparer s_fullComparer = new();
 
         public static double TNorm(double a, double b)
             => Math.Min(a, b);
 
         public static double GoedelImplication(double a, double b)
-                    => a > b ? b : 1;
+            => a > b ? b : 1;
 
         public static List<(string Src, string Trg, double)> Implication(this Fact A, Fact B)
             => [.. A.SelectMany(a => B.Select(b => (a.Key, b.Key, GoedelImplication(a.Value, b.Value))))];
@@ -43,49 +42,52 @@ namespace LW1.FuzzyLogic
         // Max-min composition
         public static Fact Composition(this Fact set, List<(string Src, string Trg, double)> rule)
             => set
-            .SelectMany(pair
-                => rule
-                .Where(cell => cell.Src == pair.Key)
-                .Select(cell
-                    => (cell.Src, cell.Trg, TNorm(cell.Item3, pair.Value))))
-            .GroupBy(tuple => tuple.Trg)
-            .Select(g => new KeyValuePair<string, double>(g.Key, g.Max(tuple => tuple.Item3)))
-            .ToDictionary()
-            .ToFact(set.Name);
+                .SelectMany(pair => set.Zip(rule
+                            .Where(tuple => tuple.Trg == pair.Key)
+                            .Select(t => (t.Trg, t.Item3))))
+                .Select(t => (t.Second.Trg, TNorm(t.Second.Item2, t.First.Value)))
+                .GroupBy(t => t.Trg)
+                .Select(g => new KeyValuePair<string, double>(g.Key, g.Max(t => t.Item2)))
+                .ToDictionary()
+                .ToFact(set.Name);
+
 
         public static IEnumerable<string> Run(KB kb)
         {
-            var facts = kb.Facts;
-            var rules = kb.Rules;
-
             var previousFactsCount = 0;
 
             do
             {
-                previousFactsCount = facts.Count;
+                previousFactsCount = kb.Facts.Count;
 
-                foreach (var rule in rules)
+                foreach (var rule in kb.Rules)
                 {
-                    var set2 = facts.First(f => f.Name == rule.Item1);
-                    var set3 = facts.First(f => f.Name == rule.Item2);
-                    
-                    foreach (var set1 in facts.WhereSupportEquals(set3))
+                    var set2 = kb.Facts.First(f => f.Name == rule.Item1);
+                    var set3 = kb.Facts.First(f => f.Name == rule.Item2);
+
+                    var inferred = kb.Facts.WhereSupportEquals(set3)
+                        .Select(set1 => (set1, Infer(set1, set2, set3).WithName($"I{kb.Facts.Count}")))
+                        .Select(tuple
+                            =>
+                            {
+                                string inferredName = "  ";
+
+                                if (!kb.Facts.Contains(tuple.Item2, s_fullComparer))
+                                {
+                                    kb.Facts.Add(tuple.Item2);
+                                    inferredName = tuple.Item2.Name;
+                                }
+
+                                return $"{inferredName} = {tuple.set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {tuple.Item2}";
+                            });
+
+                    foreach (var fact in inferred)
                     {
-                        var inferred = Infer(set1, set2, set3).WithName($"I{facts.Count}");
-
-                        if (facts.Contains(inferred, s_fullComparer))
-                        {
-                            yield return $"   = {set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {inferred}";
-                            continue;
-                        }
-
-                        facts.Add(inferred);
-
-                        yield return $"{inferred.Name} = {set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {inferred}";
+                        yield return fact;
                     }
                 }
             }
-            while (previousFactsCount != facts.Count);
+            while (previousFactsCount != kb.Facts.Count);
         }
     }
 }

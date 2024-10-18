@@ -20,7 +20,7 @@ using LW1.Parsing;
 string workingDirectory = Environment.CurrentDirectory;
 string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
 
-var filename = "1"; // Console.ReadLine();
+var filename = Console.ReadLine();
 
 using var file = File.OpenText($"{projectDirectory}/Input/{filename}.kb");
 
@@ -30,9 +30,11 @@ try
 {
     var kb = new ParserFacade(kbString).Parse();
 
-    var res = Inference.Run(kb);
+    var results = Inference.Run(kb);
 
-    foreach (var item in res)
+    Console.WriteLine("\nInference results:");
+
+    foreach (var item in results)
     {
         Console.WriteLine(item);
     }
