@@ -11,4 +11,10 @@
             return $"{{{string.Join(", ", strings)}}}";
         }
     }
+
+    public static class FactExtensions
+    {
+        public static Fact ToFact(this IEnumerable<(string Idtf, double Value)> pairs, string name)
+            => new (name, pairs);
+    }
 }

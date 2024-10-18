@@ -34,60 +34,19 @@ namespace LW1.FuzzyLogic
             => [.. sets.Where(set => sample.SequenceEqual(set, s_coreComparer))];
 
         public static Fact Infer(Fact set1, Fact set2, Fact set3)
-            => set1.And(set2.Implication(set3));
+            => set1.Composition(set2.Implication(set3));
 
-        public static Fact And(this Fact set1, List<(string Src, string Trg, double)> matrix)
-        {
-            
-            List<(string Idtf1, string Idtf2, double Value)> data = [];
-
-            foreach (var (Idtf, Value) in set1)
-            {
-                foreach(var cell in matrix)
-                {
-                    if(cell.Src == Idtf)
-                    {
-                        data.Add((cell.Src, cell.Trg, TNorm(cell.Item3, Value)));
-                    }
-                }
-            }
-
-            Dictionary<string, double> max_third_elements = [];
-            
-            foreach (var (_, Idtf2, Value) in data)
-            {
-                double? secondValue = null;
-
-                try
-                {
-                    secondValue = max_third_elements[Idtf2];
-                }
-                catch(KeyNotFoundException e)
-                {
-
-                }
-                finally { }
-
-                if (!max_third_elements.ContainsKey(Idtf2) || (secondValue is not null && Value > secondValue))
-                {
-                    if (!max_third_elements.TryAdd(Idtf2, Value))
-                    {
-                        max_third_elements[Idtf2] = Value;
-                    };
-                }
-            }
-
-            var filtered = data
-                .Where(e => max_third_elements.ContainsKey(e.Idtf2))
-                .Where(e => e.Value == max_third_elements[e.Idtf2])
-                .Select(e => (e.Idtf2, e.Value))
-                .Distinct()
-                .ToList();
-
-            return new(set1.Name, filtered);
-        }
-
-
+        public static Fact Composition(this Fact set, List<(string Src, string Trg, double)> rule)
+            => set
+            .SelectMany(pair 
+                => rule
+                .Where(cell => cell.Src == pair.Idtf)
+                .Select(cell 
+                    => (cell.Src, cell.Trg, Math.Min(cell.Item3, pair.Value))))
+            .GroupBy(tuple => tuple.Trg)
+            .Select(g => (g.Key, g.Max(tuple => tuple.Item3)))
+            .ToFact(set.Name);
+    
         public static List<string> Run(KB kb, bool show_duplicates = false)
         {
             var sets = kb.Facts;
