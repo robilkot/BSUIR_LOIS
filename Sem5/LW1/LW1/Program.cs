@@ -20,7 +20,7 @@ using LW1.Parsing;
 string workingDirectory = Environment.CurrentDirectory;
 string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
 
-var filename = Console.ReadLine();
+var filename = "1"; // Console.ReadLine();
 
 using var file = File.OpenText($"{projectDirectory}/Input/{filename}.kb");
 

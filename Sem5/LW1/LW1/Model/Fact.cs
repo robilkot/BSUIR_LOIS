@@ -16,13 +16,13 @@
 
 namespace LW1.Model
 {
-    public class Fact(string name, IEnumerable<(string Idtf, double Value)> pairs) : List<(string Idtf, double Value)>(pairs)
+    public class Fact(string name, Dictionary<string, double> pairs) : Dictionary<string, double>(pairs)
     {
         public string Name { get; set; } = name;
 
         public override string ToString()
         {
-            var strings = this.Select(pair => $"<{pair.Idtf}, {pair.Value}>");
+            var strings = this.Select(pair => $"<{pair.Key}, {pair.Value}>");
 
             return $"{{{string.Join(", ", strings)}}}";
         }
@@ -30,7 +30,7 @@ namespace LW1.Model
 
     public static class FactExtensions
     {
-        public static Fact ToFact(this IEnumerable<(string Idtf, double Value)> pairs, string name)
+        public static Fact ToFact(this Dictionary<string, double> pairs, string name)
             => new (name, pairs);
 
         public static Fact WithName(this Fact fact, string name)

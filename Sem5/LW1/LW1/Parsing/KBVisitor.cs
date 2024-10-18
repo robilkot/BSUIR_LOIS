@@ -30,7 +30,13 @@ namespace LW1.Parsing
             };
 
         private static Fact VisitFactInternal(FuzzyLogicParser.FactContext context)
-            => new ($"{context.ID()}", context.pair().Select(p => ($"{p.ID()}", double.Parse($"{p.FLOAT()}"))));
+            => new ($"{context.ID()}", context.pair()
+                .Select(p => 
+                    new KeyValuePair<string, double>(
+                        $"{p.ID()}",
+                        double.Parse($"{p.FLOAT()}"))
+                )
+                .ToDictionary());
 
         private static Rule VisitRuleInternal(FuzzyLogicParser.RuleContext context)
             => new($"{context.ID()[0]}", $"{context.ID()[1]}");

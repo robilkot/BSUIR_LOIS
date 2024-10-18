@@ -28,11 +28,14 @@ namespace LW1.FuzzyLogic
         public static double TNorm(double a, double b)
             => Math.Min(a, b);
 
+        public static double GoedelImplication(double a, double b)
+                    => a > b ? b : 1;
+
         public static List<(string Src, string Trg, double)> Implication(this Fact A, Fact B)
-            => [.. A.SelectMany(a => B.Select(b => (a.Idtf, b.Idtf, a.Value > b.Value ? b.Value : 1)))];
+            => [.. A.SelectMany(a => B.Select(b => (a.Key, b.Key, GoedelImplication(a.Value, b.Value))))];
 
         public static IEnumerable<Fact> WhereSupportEquals(this IEnumerable<Fact> sets, Fact sample)
-            => [.. sets.Where(set => sample.SequenceEqual(set, s_supportComparer))];
+            => [.. sets.Where(set => set.Keys.All(sample.ContainsKey) && set.Count == sample.Count)];
 
         public static Fact Infer(Fact set1, Fact set2, Fact set3)
             => set1.Composition(set2.Implication(set3));
@@ -42,11 +45,12 @@ namespace LW1.FuzzyLogic
             => set
             .SelectMany(pair
                 => rule
-                .Where(cell => cell.Src == pair.Idtf)
+                .Where(cell => cell.Src == pair.Key)
                 .Select(cell
                     => (cell.Src, cell.Trg, TNorm(cell.Item3, pair.Value))))
             .GroupBy(tuple => tuple.Trg)
-            .Select(g => (g.Key, g.Max(tuple => tuple.Item3)))
+            .Select(g => new KeyValuePair<string, double>(g.Key, g.Max(tuple => tuple.Item3)))
+            .ToDictionary()
             .ToFact(set.Name);
 
         public static IEnumerable<string> Run(KB kb)
@@ -64,13 +68,14 @@ namespace LW1.FuzzyLogic
                 {
                     var set2 = facts.First(f => f.Name == rule.Item1);
                     var set3 = facts.First(f => f.Name == rule.Item2);
-
-                    foreach (var set1 in facts.WhereSupportEquals(set2))
+                    
+                    foreach (var set1 in facts.WhereSupportEquals(set3))
                     {
                         var inferred = Infer(set1, set2, set3).WithName($"I{facts.Count}");
 
                         if (facts.Contains(inferred, s_fullComparer))
                         {
+                            yield return $"   = {set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {inferred}";
                             continue;
                         }
 
