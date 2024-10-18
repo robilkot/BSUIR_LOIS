@@ -44,7 +44,7 @@ namespace LW1.FuzzyLogic
                 => rule
                 .Where(cell => cell.Src == pair.Idtf)
                 .Select(cell
-                    => (cell.Src, cell.Trg, Math.Min(cell.Item3, pair.Value))))
+                    => (cell.Src, cell.Trg, TNorm(cell.Item3, pair.Value))))
             .GroupBy(tuple => tuple.Trg)
             .Select(g => (g.Key, g.Max(tuple => tuple.Item3)))
             .ToFact(set.Name);
