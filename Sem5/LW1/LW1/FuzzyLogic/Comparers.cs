@@ -5,38 +5,33 @@
 // - Робилко Тимур Маркович
 // - Абушкевич Алексей Александрович
 // 
-// Класс, отвечающий за представление нечёткого множества
+// Классы, отвечающие за сравнение нечётких множеств: по носителю и по содержанию множеств
 // 18.10.2024
 //
 // Источники:
 // - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 // - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
-// - Getting Started With ANTLR in C# / https://tomassetti.me/getting-started-with-antlr-in-csharp/
 //
 
-namespace LW1.Model
+using LW1.Model;
+using System.Diagnostics.CodeAnalysis;
+
+namespace LW1.FuzzyLogic.Comparers
 {
-    public class Fact(string name, IEnumerable<(string Idtf, double Value)> pairs) : List<(string Idtf, double Value)>(pairs)
+    public class SupportComparer : IEqualityComparer<(string Idtf, double Value)>
     {
-        public string Name { get; set; } = name;
+        public bool Equals((string Idtf, double Value) x, (string Idtf, double Value) y)
+            => x.Idtf.Equals(y.Idtf);
 
-        public override string ToString()
-        {
-            var strings = this.Select(pair => $"<{pair.Idtf}, {pair.Value}>");
-
-            return $"{{{string.Join(", ", strings)}}}";
-        }
+        public int GetHashCode([DisallowNull] (string Idtf, double Value) obj)
+            => obj.Idtf.GetHashCode();
     }
-
-    public static class FactExtensions
+    public class ContentComparer : IEqualityComparer<Fact>
     {
-        public static Fact ToFact(this IEnumerable<(string Idtf, double Value)> pairs, string name)
-            => new (name, pairs);
+        public bool Equals(Fact? x, Fact? y)
+            => x?.SequenceEqual(y) ?? false;
 
-        public static Fact WithName(this Fact fact, string name)
-        {
-            fact.Name = name;
-            return fact;
-        }
+        public int GetHashCode([DisallowNull] Fact obj)
+            => obj.GetHashCode();
     }
 }
