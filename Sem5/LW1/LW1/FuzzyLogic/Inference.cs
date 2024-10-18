@@ -1,9 +1,10 @@
 ﻿using LW1.Model;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LW1.FuzzyLogic
 {
-    public class CoreComparer : IEqualityComparer<(string Idtf, double Value)>
+    public class SupportComparer : IEqualityComparer<(string Idtf, double Value)>
     {
         public bool Equals((string Idtf, double Value) x, (string Idtf, double Value) y)
             => x.Idtf.Equals(y.Idtf);
@@ -11,7 +12,7 @@ namespace LW1.FuzzyLogic
         public int GetHashCode([DisallowNull] (string Idtf, double Value) obj)
             => obj.Idtf.GetHashCode();
     }
-    public class FullComparer : IEqualityComparer<Fact>
+    public class ContentComparer : IEqualityComparer<Fact>
     {
         public bool Equals(Fact? x, Fact? y)
             => x?.SequenceEqual(y) ?? false;
@@ -22,80 +23,65 @@ namespace LW1.FuzzyLogic
 
     public static class Inference
     {
-        private static readonly CoreComparer s_coreComparer = new();
-        private static readonly FullComparer s_fullComparer = new();
+        private static readonly SupportComparer s_supportComparer = new();
+        private static readonly ContentComparer s_fullComparer = new();
 
         public static double TNorm(double a, double b)
             => Math.Min(a, b);
-        public static List<(string Src, string Trg, double)> Implication(this Fact A, Fact B)
-            => [..A.SelectMany(a => B.Select(b => (a.Idtf, b.Idtf, a.Value > b.Value ? b.Value : 1)))];
 
-        public static List<Fact> FindFittingSets(Fact sample, List<Fact> sets)
-            => [.. sets.Where(set => sample.SequenceEqual(set, s_coreComparer))];
+        public static List<(string Src, string Trg, double)> Implication(this Fact A, Fact B)
+            => [.. A.SelectMany(a => B.Select(b => (a.Idtf, b.Idtf, a.Value > b.Value ? b.Value : 1)))];
+
+        public static IEnumerable<Fact> WhereSupportEquals(this IEnumerable<Fact> sets, Fact sample)
+            => [.. sets.Where(set => sample.SequenceEqual(set, s_supportComparer))];
 
         public static Fact Infer(Fact set1, Fact set2, Fact set3)
             => set1.Composition(set2.Implication(set3));
 
+        // Max-min composition
         public static Fact Composition(this Fact set, List<(string Src, string Trg, double)> rule)
             => set
-            .SelectMany(pair 
+            .SelectMany(pair
                 => rule
                 .Where(cell => cell.Src == pair.Idtf)
-                .Select(cell 
+                .Select(cell
                     => (cell.Src, cell.Trg, Math.Min(cell.Item3, pair.Value))))
             .GroupBy(tuple => tuple.Trg)
             .Select(g => (g.Key, g.Max(tuple => tuple.Item3)))
             .ToFact(set.Name);
-    
-        public static List<string> Run(KB kb, bool show_duplicates = false)
+
+        public static IEnumerable<string> Run(KB kb)
         {
-            var sets = kb.Facts;
+            var facts = kb.Facts;
             var rules = kb.Rules;
 
-            var old_size = 0;
-            var new_size = 1;
-
-            List<string> results = [];
-
-            while (old_size != new_size)
+            var previousFactsCount = 0;
+            
+            do
             {
-                old_size = sets.Count;
+                previousFactsCount = facts.Count;
 
                 foreach (var rule in rules)
                 {
-                    var set2 = sets.FirstOrDefault(f => f.Name == rule.Item1);
-                    var set3 = sets.FirstOrDefault(f => f.Name == rule.Item2);
+                    var set2 = facts.First(f => f.Name == rule.Item1);
+                    var set3 = facts.First(f => f.Name == rule.Item2);
 
-                    var sets1 = FindFittingSets(set2, sets);
-
-                    foreach (var set1 in sets1)
+                    foreach (var set1 in facts.WhereSupportEquals(set2))
                     {
-                        var inference = Infer(set1, set2, set3);
-                        string new_name = $"I{sets.Count}";
+                        var inferred = Infer(set1, set2, set3).WithName($"I{facts.Count}");
 
-                        inference.Name = new_name;
-
-                        if (sets.Contains(inference, s_fullComparer))
+                        if (facts.Contains(inferred, s_fullComparer))
                         {
-                            if (show_duplicates)
-                            {
-                                results.Add($"# {set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {inference}");
-                            }
                             continue;
                         }
 
-                        sets.Add(inference);
+                        facts.Add(inferred);
 
-                        results.Add($"{new_name} = {set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {inference}");
+                        yield return $"{inferred.Name} = {set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {inferred}";
                     }
-
                 }
-
-                new_size = sets.Count;
             }
-
-            return results;
+            while (previousFactsCount != facts.Count);
         }
-
     }
 }

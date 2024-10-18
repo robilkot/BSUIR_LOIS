@@ -16,5 +16,11 @@
     {
         public static Fact ToFact(this IEnumerable<(string Idtf, double Value)> pairs, string name)
             => new (name, pairs);
+
+        public static Fact WithName(this Fact fact, string name)
+        {
+            fact.Name = name;
+            return fact;
+        }
     }
 }

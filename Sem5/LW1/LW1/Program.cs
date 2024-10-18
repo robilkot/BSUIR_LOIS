@@ -14,7 +14,10 @@ try
 
     var res = Inference.Run(kb);
 
-    res.ForEach(Console.WriteLine);
+    foreach (var item in res)
+    {
+        Console.WriteLine(item);
+    }
 }
 catch (Exception ex)
 {
