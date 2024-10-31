@@ -22,7 +22,7 @@ string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.Fu
 
 //var filename = Console.ReadLine();
 
-List<int> examples = [1];//, 2, 3];
+List<int> examples = [3];
 
 foreach(var i in examples)
 {

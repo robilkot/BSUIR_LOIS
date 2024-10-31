@@ -6,7 +6,7 @@
 // - Абушкевич Алексей Александрович
 // 
 // Класс, отвечающий за представление нечёткого множества
-// 18.10.2024
+// 31.10.2024
 //
 // Источники:
 // - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
@@ -26,12 +26,28 @@ namespace LW1.Model
 
             return $"{{{string.Join(", ", strings)}}}";
         }
+
+        new public double this[string variable]
+        {
+            get
+            {
+                TryGetValue(variable, out var value);
+                return value;
+            }
+            set
+            {
+                if (!TryAdd(variable, value))
+                {
+                    base[variable] = value;
+                }
+            }
+        }
     }
 
-    public static class FactExtensions
+    public static class PredicateExtensions
     {
         public static Predicate ToPredicate(this IEnumerable<(string, double)> pairs, string name)
-            => new (name, pairs.ToDictionary());
+            => new(name, pairs.ToDictionary());
 
         public static Predicate WithName(this Predicate fact, string name)
         {
