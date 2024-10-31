@@ -20,7 +20,7 @@ namespace LW1.Model
 {
     public class KB : IEnumerable<string>
     {
-        public List<Fact> Facts { get; set; } = [];
+        public List<Predicate> Facts { get; set; } = [];
         public List<Rule> Rules { get; set; } = [];
 
         public IEnumerator<string> GetEnumerator()

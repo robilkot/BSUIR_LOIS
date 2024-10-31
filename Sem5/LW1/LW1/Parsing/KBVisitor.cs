@@ -29,7 +29,7 @@ namespace LW1.Parsing
                 Rules = [.. context.rule().Select(VisitRuleInternal)]
             };
 
-        private static Fact VisitFactInternal(FuzzyLogicParser.FactContext context)
+        private static Predicate VisitFactInternal(FuzzyLogicParser.FactContext context)
             => new ($"{context.ID()}", context.pair()
                 .Select(p => 
                     new KeyValuePair<string, double>(

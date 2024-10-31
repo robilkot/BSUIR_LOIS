@@ -16,7 +16,7 @@
 
 namespace LW1.Model
 {
-    public class Fact(string name, Dictionary<string, double> pairs) : Dictionary<string, double>(pairs)
+    public class Predicate(string name, Dictionary<string, double> pairs) : Dictionary<string, double>(pairs)
     {
         public string Name { get; set; } = name;
 
@@ -30,10 +30,10 @@ namespace LW1.Model
 
     public static class FactExtensions
     {
-        public static Fact ToFact(this Dictionary<string, double> pairs, string name)
-            => new (name, pairs);
+        public static Predicate ToPredicate(this IEnumerable<(string, double)> pairs, string name)
+            => new (name, pairs.ToDictionary());
 
-        public static Fact WithName(this Fact fact, string name)
+        public static Predicate WithName(this Predicate fact, string name)
         {
             fact.Name = name;
             return fact;

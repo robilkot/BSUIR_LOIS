@@ -16,41 +16,40 @@
 
 using LW1.FuzzyLogic.Comparers;
 using LW1.Model;
+using System.Collections;
 using System.Data;
 
 namespace LW1.FuzzyLogic
 {
     public static class Inference
     {
-        private static readonly ContentComparer s_fullComparer = new();
-
         public static double TNorm(double a, double b)
             => Math.Min(a, b);
 
         public static double GoedelImplication(double a, double b)
             => a > b ? b : 1;
 
-        public static List<(string Src, string Trg, double)> Implication(this Fact A, Fact B)
+        public static List<(string Src, string Trg, double)> Implication(this Predicate A, Predicate B)
             => [.. A.SelectMany(a => B.Select(b => (a.Key, b.Key, GoedelImplication(a.Value, b.Value))))];
 
-        public static IEnumerable<Fact> WhereSupportEquals(this IEnumerable<Fact> sets, Fact sample)
+        public static IEnumerable<Predicate> WhereSupportEquals(this IEnumerable<Predicate> sets, Predicate sample)
             => [.. sets.Where(set => set.Keys.All(sample.ContainsKey) && set.Count == sample.Count)];
 
-        public static Fact Infer(Fact set1, Fact set2, Fact set3)
-            => set1.Composition(set2.Implication(set3));
+        public static Predicate Infer(Predicate set1, Predicate set2, Predicate set3)
+            => set1.Composition(set2.Implication(set3).Log());
 
-        // Max-min composition
-        public static Fact Composition(this Fact set, List<(string Src, string Trg, double)> rule)
+        public static Predicate Composition(this Predicate set, List<(string Src, string Trg, double Value)> rule)
             => set
-                .SelectMany(pair => set.Zip(rule
+                .SelectMany(pair => set
+                            .Select(pair => (pair.Key, pair.Value))
+                            .Zip(rule
                             .Where(tuple => tuple.Trg == pair.Key)
-                            .Select(t => (t.Trg, t.Item3))))
-                .Select(t => (t.Second.Trg, TNorm(t.Second.Item2, t.First.Value)))
+                            .Select(t => (t.Trg, t.Value))
+                    .Log()))
+                .Select(t => (t.Second.Trg, TNorm(t.First.Value, t.Second.Value)))
                 .GroupBy(t => t.Trg)
-                .Select(g => new KeyValuePair<string, double>(g.Key, g.Max(t => t.Item2)))
-                .ToDictionary()
-                .ToFact(set.Name);
-
+                .Select(g => (g.Key, g.Max(t => t.Item2)))
+                .ToPredicate(set.Name);
 
         public static IEnumerable<string> Run(KB kb)
         {
@@ -65,21 +64,16 @@ namespace LW1.FuzzyLogic
                     var set2 = kb.Facts.First(f => f.Name == rule.Item1);
                     var set3 = kb.Facts.First(f => f.Name == rule.Item2);
 
-                    var inferred = kb.Facts.WhereSupportEquals(set3)
+                    var inferred = kb.Facts
+                        .WhereSupportEquals(set3)
                         .Select(set1 => (set1, Infer(set1, set2, set3).WithName($"I{kb.Facts.Count}")))
-                        .Select(tuple
-                            =>
-                            {
-                                string inferredName = "  ";
+                        .Where(tuple => !kb.Facts.Contains(tuple.Item2, new ContentComparer())) // Dont add duplicates
+                        .Select(tuple =>
+                        {
+                            kb.Facts.Add(tuple.Item2);
 
-                                if (!kb.Facts.Contains(tuple.Item2, s_fullComparer))
-                                {
-                                    kb.Facts.Add(tuple.Item2);
-                                    inferredName = tuple.Item2.Name;
-                                }
-
-                                return $"{inferredName} = {tuple.set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {tuple.Item2}";
-                            });
+                            return $"{tuple.Item2.Name} = {tuple.set1.Name}/~\\({rule.Item1}~>{rule.Item2}) = {tuple.Item2}";
+                        });
 
                     foreach (var fact in inferred)
                     {
@@ -88,6 +82,35 @@ namespace LW1.FuzzyLogic
                 }
             }
             while (previousFactsCount != kb.Facts.Count);
+        }
+        //public static IEnumerable<T> Log<T>(this IEnumerable<T> obj, Func<T, string>? formatter = null)
+        //{
+        //    formatter ??= (t) => $"{t}";
+
+        //    foreach (var o in obj)
+        //    {
+        //        Console.WriteLine(formatter(o));
+        //    }
+
+        //    return obj;
+        //}
+        public static T Log<T>(this T obj, Func<T, string>? formatter = null)
+        {
+            formatter ??= (t) => $"{t}";
+
+            //Console.WriteLine(formatter(obj));
+
+            if (obj is IEnumerable en)
+            {
+                foreach (var o in en)
+                    Console.WriteLine(o);
+            }
+            else
+            {
+                Console.WriteLine(formatter(obj));
+            }
+
+            return obj;
         }
     }
 }

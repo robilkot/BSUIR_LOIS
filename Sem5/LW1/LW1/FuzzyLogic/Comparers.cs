@@ -18,14 +18,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace LW1.FuzzyLogic.Comparers
 {
-    public class ContentComparer : IEqualityComparer<Fact>
+    public class ContentComparer : IEqualityComparer<Predicate>
     {
-        public bool Equals(Fact? x, Fact? y)
+        public bool Equals(Predicate? x, Predicate? y)
             => y is not null 
             && x is not null 
             && x.All(kvp => y.TryGetValue(kvp.Key, out var comp) && comp == kvp.Value) 
             && x.Count == y.Count;
 
-        public int GetHashCode([DisallowNull] Fact obj) => obj.GetHashCode();
+        public int GetHashCode([DisallowNull] Predicate obj) => obj.GetHashCode();
     }
 }

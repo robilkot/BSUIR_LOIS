@@ -20,26 +20,31 @@ using LW1.Parsing;
 string workingDirectory = Environment.CurrentDirectory;
 string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
 
-var filename = Console.ReadLine();
+//var filename = Console.ReadLine();
 
-using var file = File.OpenText($"{projectDirectory}/Input/{filename}.kb");
+List<int> examples = [1];//, 2, 3];
 
-string kbString = file.ReadToEnd();
-
-try
+foreach(var i in examples)
 {
-    var kb = new ParserFacade(kbString).Parse();
+    using var file = File.OpenText($"{projectDirectory}/Input/{i}.kb");
 
-    var results = Inference.Run(kb);
+    string kbString = file.ReadToEnd();
 
-    Console.WriteLine("\nInference results:");
-
-    foreach (var item in results)
+    try
     {
-        Console.WriteLine(item);
+        var kb = new ParserFacade(kbString).Parse();
+
+        var results = Inference.Run(kb);
+
+        Console.WriteLine("\nInference results:");
+
+        foreach (var item in results)
+        {
+            Console.WriteLine(item);
+        }
     }
-}
-catch (Exception ex)
-{
-    Console.WriteLine(ex);
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex);
+    }
 }
