@@ -48,6 +48,8 @@ namespace LW1.Model
     {
         public static Predicate ToPredicate(this IEnumerable<(string, double)> pairs, string name)
             => new(name, pairs.ToDictionary());
+        public static Predicate ToPredicate(this Dictionary<string, double> pairs, string name)
+            => new(name, pairs);
 
         public static Predicate WithName(this Predicate fact, string name)
         {
