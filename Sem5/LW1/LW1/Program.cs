@@ -6,7 +6,7 @@
 // - Абушкевич Алексей Александрович
 // 
 // Основной код программы, отвечающий за считывание данных из файла и запуск нечеткого логического вывода
-// 18.10.2024
+// 01.11.2024
 //
 // Источники:
 // - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
@@ -22,7 +22,7 @@ string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.Fu
 
 //var filename = Console.ReadLine();
 
-List<int> examples = [3];
+List<int> examples = [1];
 
 foreach(var i in examples)
 {
