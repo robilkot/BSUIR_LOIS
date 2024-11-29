@@ -34,7 +34,7 @@ foreach(var i in examples)
     {
         var kb = new ParserFacade(kbString).Parse();
 
-        var results = Inference.Run(kb);
+        var results = Inference.Run(kb, true);
 
         Console.WriteLine("\nInference results:");
 

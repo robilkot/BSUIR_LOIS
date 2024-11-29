@@ -31,14 +31,9 @@ def less_equal(x: float, y: float, name: str):
     return Answer({name: FuzzyInterval(FuzzyValue(0.0), FuzzyValue(y - x + 1.0))})
 
 
-def greater_equal():
-    return
-
-
 operation = {
     "==": equality,
-    "<=": less_equal,
-    ">=": greater_equal
+    "<=": less_equal
 }
 
 

@@ -15,7 +15,7 @@ from FuzzyLogic.functions import invalid_type_error
 
 
 class Answer(dict):
-    def __init__(self, intervals: dict = None, solutions: list = None, type_of_answer: str = None):
+    def __init__(self, intervals: dict = None, solutions: list = None, type_of_answer: str = "and"):
         super().__init__()
         if solutions is None:
             solutions = list()
@@ -35,9 +35,7 @@ class Answer(dict):
         else:
             invalid_type_error(self.__init__, intervals, dict)
 
-        if type_of_answer is None:
-            type_of_answer = "and"
-        elif type_of_answer not in ("and", "or"):
+        if type_of_answer not in ("and", "or"):
             invalid_type_error(self.__init__, type_of_answer, ("and", "or"))
         self.type_of_answer: str = type_of_answer
 
@@ -115,8 +113,6 @@ class Answer(dict):
         super().clear()
         self.solutions = list()
 
-    def combinations(self):
-        result = Answer()
     def __eq__(self, other):
         if len(self) == len(other) and len(self.solutions) and len(other.solutions):
             for key in self:
@@ -132,6 +128,3 @@ class Answer(dict):
                     return False
             return True
         return False
-
-    def multiplication(self, other):
-        pass
