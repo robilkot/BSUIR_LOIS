@@ -10,10 +10,8 @@
 #  Источники:
 # - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
-
-
-from .FuzzySet import FuzzySet
-from .FuzzyValue import FuzzyValue
+from FuzzyLogic.FuzzySet import FuzzySet
+from FuzzyLogic.FuzzyValue import FuzzyValue
 
 
 class Predicate(FuzzySet):

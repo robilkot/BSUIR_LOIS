@@ -12,8 +12,9 @@
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
 
-from .FuzzyValue import FuzzyValue
-from .functions import invalid_type_error
+from __future__ import annotations
+
+from FuzzyLogic.FuzzyValue import FuzzyValue
 
 
 class FuzzyInterval:
@@ -21,37 +22,21 @@ class FuzzyInterval:
         if upper_border < lower_border:
             upper_border, lower_border = lower_border, upper_border
 
-        if isinstance(lower_border, FuzzyValue):
-            self.lower_border: FuzzyValue = lower_border
-        elif isinstance(lower_border, float):
-            self.lower_border: FuzzyValue = FuzzyValue(lower_border)
-        else:
-            invalid_type_error(self.__init__, lower_border, FuzzyValue)
-
-        if isinstance(upper_border, FuzzyValue):
-            self.upper_border: FuzzyValue = upper_border
-        elif isinstance(upper_border, float):
-            self.upper_border: FuzzyValue = FuzzyValue(upper_border)
-        else:
-            invalid_type_error(self.__init__, upper_border, FuzzyValue)
+        self.lower_border: FuzzyValue = lower_border
+        self.upper_border: FuzzyValue = upper_border
 
     def __contains__(self, item: FuzzyValue) -> bool:
-        if isinstance(item, (FuzzyValue, float)):
-            return self.lower_border <= item <= self.upper_border
-        else:
-            invalid_type_error(self.__contains__, item, FuzzyValue)
+        return self.lower_border <= item <= self.upper_border
 
-    def __mul__(self, other):
+    def __mul__(self, other: FuzzyInterval | None):
         if other is None:
             return None
-        if isinstance(other, FuzzyInterval):
-            if self.lower_border <= other.upper_border and other.lower_border <= self.upper_border:
-                return FuzzyInterval(max(self.lower_border, other.lower_border),
-                                     min(self.upper_border, other.upper_border))
-            else:
-                return None
+
+        if self.lower_border <= other.upper_border and other.lower_border <= self.upper_border:
+            return FuzzyInterval(max(self.lower_border, other.lower_border),
+                                 min(self.upper_border, other.upper_border))
         else:
-            invalid_type_error(self.__mul__, other, FuzzyInterval)
+            return None
 
     def __repr__(self) -> str:
         return str(self)
@@ -62,9 +47,5 @@ class FuzzyInterval:
         else:
             return "[" + str(self.lower_border) + ", " + str(self.upper_border) + "]"
 
-    def __eq__(self, other) -> bool:
-        if isinstance(other, FuzzyInterval):
-            return self.lower_border.value == other.lower_border.value \
-                and self.upper_border.value == other.upper_border.value
-        else:
-            invalid_type_error(self.__eq__, other, FuzzyInterval)
+    def __eq__(self, other: FuzzyInterval) -> bool:
+        return self.lower_border == other.lower_border and self.upper_border == other.upper_border

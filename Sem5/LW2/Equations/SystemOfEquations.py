@@ -10,24 +10,21 @@
 #  Источники:
 # - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
-
+from Models.Enums import Operations
 from .Equation import *
 from .Answer import Answer
 
 
 class SystemOfEquations:
-    def __init__(self, type_of_system="and", list_of_systems: list = None):
+    def __init__(self, type: Operations = Operations.AND, list_of_systems: list | None = None):
         self.list_of_equations: list = list()
-        self.type_of_system = type_of_system
+        self.type = type
         self.keys = set()
-        if list_of_systems is None:
-            return
-        if not isinstance(list_of_systems, list):
-            invalid_type_error(self.__init__, list_of_systems, list)
-            return
-        for system in list_of_systems:
-            self.list_of_equations.append(system)
-            self.keys.update(system.keys())
+
+        if list_of_systems is not None:
+            for system in list_of_systems:
+                self.list_of_equations.append(system)
+                self.keys.update(system.keys())
 
     def add_equation(self, equation):
         self.list_of_equations.append(equation)
@@ -40,24 +37,24 @@ class SystemOfEquations:
     def initialize(self, main_equation):
         for key in main_equation.keys():
             self.keys.add(key)
-            temp_system_of_equations = SystemOfEquations("and")
+            temp_system_of_equations = SystemOfEquations()
             for x, value_x in main_equation.items():
                 if key == x:
                     temp_system_of_equations.add_equation(
-                        Equation(x, value_x, main_equation.consequent_value, operation["=="]))
+                        Equation(x, value_x, main_equation.consequent_value, equality))
                 else:
                     temp_system_of_equations.add_equation(
-                        Equation(x, value_x, main_equation.consequent_value, operation["<="]))
+                        Equation(x, value_x, main_equation.consequent_value, less_equal))
             self.list_of_equations.append(temp_system_of_equations)
             if len(self.list_of_equations) != len(self.keys):
                 print("Невозможная операция")
 
     def calculate_answers(self):
-        answers = Answer(type_of_answer=self.type_of_system)
+        answers = Answer(None, None, type_of_answer=self.type)
         for item in self.list_of_equations:
             answer = item.calculate_answers()
             answers.add_answer(answer)
         return answers
 
     def __repr__(self):
-        return f"{self.type_of_system} {tuple(str(equation) for equation in self.list_of_equations)}"
+        return f"{self.type} {tuple(str(equation) for equation in self.list_of_equations)}"

@@ -12,41 +12,30 @@
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
 
-from .functions import invalid_type_error
+from __future__ import annotations
 
 
 class FuzzyValue:
-    def __init__(self, value: float) -> None:
+    def __init__(self, value: float | FuzzyValue) -> None:
         if isinstance(value, float):
             self.value: float = max(0.0, min(1.0, round(value, 8)))
-        elif isinstance(value, FuzzyValue):
-            self.value: float = value.value
         else:
-            invalid_type_error(self.__init__, value, float)
+            self.value: float = value.value
+
+    def __hash__(self) -> int:
+        return hash(self.value)
 
     def __str__(self) -> str:
         return str(self.value)
 
-    def __lt__(self, other) -> bool:
-        if isinstance(other, FuzzyValue):
-            return self.value < other.value
-        elif isinstance(other, float):
-            return self.value < other
-        else:
-            invalid_type_error(self.__lt__, other, FuzzyValue)
+    def __eq__(self, other) -> bool:
+        return self.value == other.value
 
-    def __le__(self, other) -> bool:
-        if isinstance(other, FuzzyValue):
-            return self.value <= other.value
-        elif isinstance(other, float):
-            return self.value <= other
-        else:
-            invalid_type_error(self.__le__, other, FuzzyValue)
+    def __lt__(self, other: FuzzyValue) -> bool:
+        return self.value < other.value
 
-    def __ge__(self, other) -> bool:
-        if isinstance(other, FuzzyValue):
-            return self.value >= other.value
-        elif isinstance(other, float):
-            return self.value >= other
-        else:
-            invalid_type_error(self.__ge__, other, FuzzyValue)
+    def __le__(self, other: FuzzyValue) -> bool:
+        return self.value <= other.value
+
+    def __ge__(self, other: FuzzyValue) -> bool:
+        return self.value >= other.value

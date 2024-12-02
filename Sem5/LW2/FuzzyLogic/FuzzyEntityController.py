@@ -14,10 +14,11 @@
 
 import json
 
-from .FuzzyValue import FuzzyValue
-from .Predicate import Predicate
-from .FuzzySet import FuzzySet
-from Equations import MainEquation
+from Equations.MainEquation import MainEquation
+from FuzzyLogic.FuzzySet import FuzzySet
+from FuzzyLogic.FuzzyValue import FuzzyValue
+from FuzzyLogic.Predicate import Predicate
+from Models.Enums import Operations
 from Equations.SystemOfEquations import SystemOfEquations
 
 
@@ -73,10 +74,10 @@ class FuzzyEntityController:
 
     @staticmethod
     def calculate_answer(consequent, predicate):
-        main_system_of_equations = SystemOfEquations("and")
+        main_system_of_equations = SystemOfEquations(Operations.AND)
         for consequen in consequent:
-            main_equation = MainEquation.MainEquation(consequen[0], predicate, consequen[1])
-            system_of_equations = SystemOfEquations("or")
+            main_equation = MainEquation(consequen[0], predicate, consequen[1])
+            system_of_equations = SystemOfEquations(Operations.OR)
             system_of_equations.initialize(main_equation)
             main_system_of_equations.add_system(system_of_equations)
         return main_system_of_equations.calculate_answers()
