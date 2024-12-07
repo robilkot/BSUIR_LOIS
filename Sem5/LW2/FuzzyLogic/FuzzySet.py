@@ -13,10 +13,13 @@
 from FuzzyLogic.FuzzyValue import FuzzyValue
 
 
-class FuzzySet(set):
+class FuzzySet(list):
     def add(self, element, fuzzy_value: FuzzyValue) -> None:
         for item in self:
             if item[0] == element:
                 return
 
-        super().add((element, fuzzy_value))
+        super().append((element, fuzzy_value))
+
+    def __str__(self):
+        return "{ " + ", ".join(f'<{element[0]}, {element[1]}>' for element in self) + " }"

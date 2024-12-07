@@ -12,72 +12,19 @@
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
 
-import json
-
 from Equations.MainEquation import MainEquation
 from FuzzyLogic.FuzzySet import FuzzySet
-from FuzzyLogic.FuzzyValue import FuzzyValue
-from FuzzyLogic.Predicate import Predicate
 from Models.Enums import Operations
 from Equations.SystemOfEquations import SystemOfEquations
 
 
-class FuzzyEntityController:
-    @staticmethod
-    def get_text_of_fuzzy_element(fuzzy_element):
-        return f"<{fuzzy_element[0]}, {fuzzy_element[1].value}>"
+def calculate_answer(fuzzy_set: FuzzySet, predicate):
+    main_system = SystemOfEquations(Operations.AND)
 
-    @staticmethod
-    def get_text_of_fuzzy_pair(fuzzy_pair):
-        return f"<<{fuzzy_pair[0][0]}, {fuzzy_pair[0][1]}>, {fuzzy_pair[1].value}>"
+    for consequent in fuzzy_set:
+        main_equation = MainEquation(consequent[0], predicate, consequent[1])
+        system = SystemOfEquations(Operations.OR)
+        system.initialize(main_equation)
+        main_system.add_system(system)
 
-    @staticmethod
-    def get_text_of_fuzzy_set(fuzzy_set, inline=False):
-        separator = " " if inline else "\n"
-        return "{" + separator + ", ".join(
-            FuzzyEntityController.get_text_of_fuzzy_element(element) for element in fuzzy_set) + separator + "}"
-
-    @staticmethod
-    def get_text_of_fuzzy_predicate(fuzzy_predicate, inline=False):
-        separator = " " if inline else "\n"
-        return "{" + separator + ", ".join(
-            FuzzyEntityController.get_text_of_fuzzy_pair(element) for element in fuzzy_predicate) + separator + "}"
-
-    @staticmethod
-    def read_sets_from_file(filename):
-        sets = dict()
-        with open(filename, 'r') as file:
-            data = json.load(file)
-            for set_name, set_ in data.items():
-                new_set = FuzzySet()
-                for name, value in set_:
-                    new_set.add(name, FuzzyValue(value))
-                sets[set_name] = sorted(new_set)
-        return sets
-
-    @staticmethod
-    def read_predicates_from_file(filename):
-        predicates = dict()
-        with open(filename, 'r') as file:
-            data = json.load(file)
-            for pred_name, pred in data.items():
-                new_pred = Predicate(predicate=pred)
-                predicates[pred_name] = new_pred
-        return predicates
-
-    @staticmethod
-    def calculate_ancedent(consequent, predicate):
-        for i in consequent:
-            for j in predicate:
-                if j[0][1] != i[0]:
-                    continue
-
-    @staticmethod
-    def calculate_answer(consequent, predicate):
-        main_system_of_equations = SystemOfEquations(Operations.AND)
-        for consequen in consequent:
-            main_equation = MainEquation(consequen[0], predicate, consequen[1])
-            system_of_equations = SystemOfEquations(Operations.OR)
-            system_of_equations.initialize(main_equation)
-            main_system_of_equations.add_system(system_of_equations)
-        return main_system_of_equations.calculate_answers()
+    return main_system.calculate_answers()

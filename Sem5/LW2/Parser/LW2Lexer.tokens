@@ -1,0 +1,10 @@
+T__0=1
+T__1=2
+T__2=3
+NAME=4
+FLOAT=5
+LINE_COMMENT=6
+WS=7
+'\n\n'=1
+'\n'=2
+' '=3

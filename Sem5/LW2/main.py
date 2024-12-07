@@ -11,17 +11,14 @@
 # - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
-from FuzzyLogic import FuzzyEntityController
 
+from FuzzyLogic.FuzzyEntityController import calculate_answer
+from Parser.Facade import parse_file
 
 if __name__ == "__main__":
-    controller = FuzzyEntityController.FuzzyEntityController()
-    all_sets = controller.read_sets_from_file("sets.json")
-    all_predicates = controller.read_predicates_from_file("predicates.json")
+    fuzzy_set, predicate = parse_file("Input/2.kb")
+    answers = calculate_answer(fuzzy_set, predicate)
 
-    for (set_name, fuzzy_set), (predicate_name, predicate) in zip(all_sets.items(), all_predicates.items()):
-        print(f"Обработка для множества '{set_name}' и предиката '{predicate_name}':")
-        print(set_name, ":", controller.get_text_of_fuzzy_set(fuzzy_set, True))
-        print(predicate_name, ":", controller.get_text_of_fuzzy_predicate(predicate, True))
-        answers = controller.calculate_answer(fuzzy_set, predicate)
-        print(f"'{set_name}' '{predicate_name}': {answers}")
+    print("set:", fuzzy_set)
+    print("pre:", predicate)
+    print(f"ans: {answers}")

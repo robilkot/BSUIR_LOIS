@@ -16,11 +16,8 @@ from __future__ import annotations
 
 
 class FuzzyValue:
-    def __init__(self, value: float | FuzzyValue) -> None:
-        if isinstance(value, float):
-            self.value: float = max(0.0, min(1.0, round(value, 8)))
-        else:
-            self.value: float = value.value
+    def __init__(self, value: float) -> None:
+        self.value: float = max(0.0, min(1.0, round(value, 8)))
 
     def __hash__(self) -> int:
         return hash(self.value)

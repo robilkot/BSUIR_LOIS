@@ -38,9 +38,6 @@ class FuzzyInterval:
         else:
             return None
 
-    def __repr__(self) -> str:
-        return str(self)
-
     def __str__(self) -> str:
         if self.lower_border.value == self.upper_border.value:
             return "{" + str(self.lower_border) + "}"

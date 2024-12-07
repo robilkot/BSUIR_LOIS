@@ -14,6 +14,10 @@ from FuzzyLogic.FuzzySet import FuzzySet
 from FuzzyLogic.FuzzyValue import FuzzyValue
 
 
+def get_text_of_fuzzy_pair(fuzzy_pair: tuple[tuple[str, str], FuzzyValue]):
+    return f"<<{fuzzy_pair[0][0]}, {fuzzy_pair[0][1]}>, {fuzzy_pair[1].value}>"
+
+
 class Predicate(FuzzySet):
     def __init__(self, predicate=None):
         super().__init__()
@@ -21,3 +25,6 @@ class Predicate(FuzzySet):
         if predicate:
             for i, j in predicate:
                 self.add((i[0], i[1]), FuzzyValue(j))
+
+    def __str__(self):
+        return "{ " + ", ".join(get_text_of_fuzzy_pair(element) for element in self) + " }"

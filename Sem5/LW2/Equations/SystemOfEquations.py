@@ -16,22 +16,17 @@ from .Answer import Answer
 
 
 class SystemOfEquations:
-    def __init__(self, type: Operations = Operations.AND, list_of_systems: list | None = None):
-        self.list_of_equations: list = list()
+    def __init__(self, type: Operations = Operations.AND):
         self.type = type
+        self.equations: list = list()
         self.keys = set()
 
-        if list_of_systems is not None:
-            for system in list_of_systems:
-                self.list_of_equations.append(system)
-                self.keys.update(system.keys())
-
     def add_equation(self, equation):
-        self.list_of_equations.append(equation)
+        self.equations.append(equation)
         self.keys.update(equation.keys)
 
     def add_system(self, system):
-        self.list_of_equations.append(system)
+        self.equations.append(system)
         self.keys.update(system.keys)
 
     def initialize(self, main_equation):
@@ -45,16 +40,18 @@ class SystemOfEquations:
                 else:
                     temp_system_of_equations.add_equation(
                         Equation(x, value_x, main_equation.consequent_value, less_equal))
-            self.list_of_equations.append(temp_system_of_equations)
-            if len(self.list_of_equations) != len(self.keys):
+            self.equations.append(temp_system_of_equations)
+            if len(self.equations) != len(self.keys):
                 print("Невозможная операция")
 
-    def calculate_answers(self):
+    def calculate_answers(self) -> Answer:
         answers = Answer(None, None, type_of_answer=self.type)
-        for item in self.list_of_equations:
-            answer = item.calculate_answers()
+
+        for equation in self.equations:
+            answer = equation.calculate_answers()
             answers.add_answer(answer)
+
         return answers
 
     def __repr__(self):
-        return f"{self.type} {tuple(str(equation) for equation in self.list_of_equations)}"
+        return f"{self.type} {tuple(str(equation) for equation in self.equations)}"

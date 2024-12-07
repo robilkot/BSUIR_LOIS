@@ -84,7 +84,7 @@ class Answer(dict):
             super().clear()
         return
 
-    def __repr__(self):
+    def __str__(self):
         result = str()
         for key in sorted(self):
             result += f"{key + ' э ' + str(self[key])}" + '\n'
