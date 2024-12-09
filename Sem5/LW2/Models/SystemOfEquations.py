@@ -53,6 +53,3 @@ class SystemOfEquations:
             answers.add_answer(answer)
 
         return answers
-
-    def __repr__(self):
-        return f"{self.type} {tuple(str(equation) for equation in self.equations)}"

@@ -12,7 +12,7 @@
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
 
-from FuzzyLogic.FuzzyEntityController import calculate_answer
+from FuzzyLogic.Solver import calculate_answer
 from Parser.Facade import parse_file
 
 if __name__ == "__main__":
