@@ -14,31 +14,31 @@ class KBListener(Listener):
         self.rule: Predicate = Predicate()
 
     def __parse_implication(self, ctx: Parser.ImplicationContext) -> None:
-        elements = [d for d in ctx.elements().getChildren() if isinstance(d, Parser.ElementContext)]
-        degrees = [d for d in ctx.truth_degrees().getChildren() if isinstance(d, Parser.Membership_degreeContext)]
+        elements = ctx.elements().getChildren(lambda c: isinstance(c, Parser.ElementContext))
+        degrees = ctx.truth_degrees().getChildren(lambda c: isinstance(c, Parser.Membership_degreeContext))
 
         for pair in zip(elements, degrees):
-            elementText, valueText = pair[0].getText(), pair[1].getText()
-            self.implication.add(elementText, FuzzyValue(float(valueText)))
+            element, value = pair[0].getText(), float(pair[1].getText())
+            self.implication.add(element, FuzzyValue(value))
 
     def __parse_rule(self, ctx: Parser.RuleContext) -> None:
-        second_domain_elements = [item[0] for item in self.implication]
-        first_domain_elements = [d for d in ctx.elements().getChildren() if isinstance(d, Parser.ElementContext)]
+        elements2 = [item[0] for item in self.implication]
+        elements1 = ctx.elements().getChildren(lambda c: isinstance(c, Parser.ElementContext))
 
         for i, row in enumerate(ctx.truth_degrees()):
-            degrees = [d for d in row.getChildren() if isinstance(d, Parser.Membership_degreeContext)]
+            degrees = row.getChildren(lambda c: isinstance(c, Parser.Membership_degreeContext))
 
-            for pair in zip(first_domain_elements, degrees):
-                first_element, second_element = pair[0].getText(), second_domain_elements[i]
+            for pair in zip(elements1, degrees):
+                first, second = pair[0].getText(), elements2[i]
                 value = FuzzyValue(float(pair[1].getText()))
-                self.rule.add((first_element, second_element), value)
+                self.rule.add((first, second), value)
 
     def enterKb(self, ctx: Parser.KbContext):
         self.__parse_implication(ctx.implication())
         self.__parse_rule(ctx.rule_())
 
 
-class ANTLRFacade:
+class Facade:
     def __init__(self, source_text: str):
         self._walker = ParseTreeWalker()
         self._input_stream = InputStream(source_text)
@@ -56,4 +56,4 @@ class ANTLRFacade:
 
 def parse_file(path: str) -> (FuzzySet, Predicate):
     with open(path) as file:
-        return ANTLRFacade(file.read()).parse()
+        return Facade(file.read()).parse()
