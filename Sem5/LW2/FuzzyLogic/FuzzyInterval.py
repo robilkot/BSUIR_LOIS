@@ -42,7 +42,7 @@ class FuzzyInterval:
         if self.lower_border.value == self.upper_border.value:
             return "{" + str(self.lower_border) + "}"
         else:
-            return "[" + str(self.lower_border) + ", " + str(self.upper_border) + "]"
+            return "[" + str(self.lower_border) + ";" + str(self.upper_border) + "]"
 
     def __eq__(self, other: FuzzyInterval) -> bool:
         return self.lower_border == other.lower_border and self.upper_border == other.upper_border

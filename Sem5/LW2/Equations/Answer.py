@@ -16,12 +16,12 @@ from Models.Enums import Operations
 
 
 class Answer(dict):
-    def __init__(self, intervals: dict | None, solutions: list | None, type_of_answer: Operations = Operations.AND):
+    def __init__(self, intervals: dict | None, solutions: list[Answer] | None, type_of_answer: Operations = Operations.AND):
         super().__init__()
         if solutions is None:
             solutions = list()
 
-        self.solutions: list = solutions
+        self.solutions: list[Answer] = solutions
 
         if intervals is None:
             intervals = dict()
@@ -85,15 +85,11 @@ class Answer(dict):
         return
 
     def __str__(self):
-        result = str()
-        for key in sorted(self):
-            result += f"{key + ' э ' + str(self[key])}" + '\n'
-        for answer in self.solutions:
-            if answer.type_of_answer == Operations.AND:
-                result += "{" + str(answer) + "}\n"
-            elif answer.type_of_answer == Operations.OR:
-                result += "[" + str(answer) + "]\n"
-        return '\n' + result
+        if len(self.solutions) == 0:
+            return 'x'.join([str(self[key]) for key in self])
+        else:
+            answers = [f'({ans})' if ans.type_of_answer == Operations.AND else str(ans) for ans in self.solutions]
+            return 'U'.join(answers)
 
     def clear(self) -> None:
         super().clear()
