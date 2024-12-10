@@ -14,39 +14,30 @@
 from Models.Enums import Operations
 from .Equation import *
 from .Answer import Answer
+from .MainEquation import MainEquation
 
 
 class SystemOfEquations:
-    def __init__(self, type: Operations = Operations.AND):
+    def __init__(self, equation: MainEquation | None = None, type: Operations = Operations.AND):
         self.type = type
         self.equations: list = list()
-        self.keys = set()
 
-    def add_equation(self, equation):
-        self.equations.append(equation)
-        self.keys.update(equation.keys)
-
-    def add_system(self, system):
-        self.equations.append(system)
-        self.keys.update(system.keys)
+        if equation:
+            self.initialize(equation)
 
     def initialize(self, main_equation):
         for key in main_equation.keys():
-            self.keys.add(key)
-            temp_system_of_equations = SystemOfEquations()
-            for x, value_x in main_equation.items():
-                if key == x:
-                    temp_system_of_equations.add_equation(
-                        Equation(x, value_x, main_equation.consequent_value, equality))
-                else:
-                    temp_system_of_equations.add_equation(
-                        Equation(x, value_x, main_equation.consequent_value, less_equal))
-            self.equations.append(temp_system_of_equations)
-            if len(self.equations) != len(self.keys):
-                print("Невозможная операция")
+            new_system = SystemOfEquations()
+
+            for variable, value in main_equation.items():
+                comparer = equality if key == variable else less_equal
+                equation = Equation(variable, value, main_equation.consequent_value, comparer)
+                new_system.equations.append(equation)
+
+            self.equations.append(new_system)
 
     def calculate_answers(self) -> Answer:
-        answers = Answer(None, None, type_of_answer=self.type)
+        answers = Answer(type_of_answer=self.type)
 
         for equation in self.equations:
             answer = equation.calculate_answers()

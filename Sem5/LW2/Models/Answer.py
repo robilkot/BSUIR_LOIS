@@ -16,7 +16,10 @@ from Models.Enums import Operations
 
 
 class Answer(dict):
-    def __init__(self, intervals: dict | None, solutions: list[Answer] | None, type_of_answer: Operations = Operations.AND):
+    def __init__(self,
+                 intervals: dict | None = None,
+                 solutions: list[Answer] | None = None,
+                 type_of_answer: Operations = Operations.AND):
         super().__init__()
 
         self.solutions: list[Answer] = [] if solutions is None else solutions

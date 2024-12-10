@@ -1,3 +1,17 @@
+# Практическая работа №2 по дисциплине ЛОИС
+# Вариант 3: Запрограммировать обратный нечеткий логический вывод на основе операции нечеткой композиции (max({max({0}U{xi+yi-1})|i})).
+# Выполнили студенты группы 221701 БГУИР:
+# - Робилко Тимур Маркович
+# - Абушкевич Алексей Александрович
+#
+# Файл, отвечающий за парсинг входных данных
+# 10.12.2024
+#
+# Источники:
+# - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
+# - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
+
+
 from antlr4 import InputStream, CommonTokenStream, ParseTreeWalker
 
 from FuzzyLogic.FuzzySet import FuzzySet
@@ -19,6 +33,7 @@ class KBListener(Listener):
 
         for pair in zip(elements, degrees):
             element, value = pair[0].getText(), float(pair[1].getText())
+            self.__validate(value)
             self.implication.add(element, FuzzyValue(value))
 
     def __parse_rule(self, ctx: Parser.RuleContext) -> None:
@@ -29,9 +44,13 @@ class KBListener(Listener):
             degrees = row.getChildren(lambda c: isinstance(c, Parser.Membership_degreeContext))
 
             for pair in zip(elements1, degrees):
-                first, second = pair[0].getText(), elements2[i]
-                value = FuzzyValue(float(pair[1].getText()))
-                self.rule.add((first, second), value)
+                first, second, value = pair[0].getText(), elements2[i], float(pair[1].getText())
+                self.__validate(value)
+                self.rule.add((first, second), FuzzyValue(value))
+
+    def __validate(self, value: float):
+        if value < 0 or value > 1:
+            raise ValueError("Value must be between 0 and 1")
 
     def enterKb(self, ctx: Parser.KbContext):
         self.__parse_implication(ctx.implication())

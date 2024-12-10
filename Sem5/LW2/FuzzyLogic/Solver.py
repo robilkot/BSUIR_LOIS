@@ -19,12 +19,17 @@ from Models.SystemOfEquations import SystemOfEquations
 
 
 def calculate_answer(fuzzy_set: FuzzySet, predicate):
-    main_system = SystemOfEquations(Operations.AND)
+    system = SystemOfEquations()
 
     for consequent in fuzzy_set:
-        main_equation = MainEquation(consequent[0], predicate, consequent[1])
-        system = SystemOfEquations(Operations.OR)
-        system.initialize(main_equation)
-        main_system.add_system(system)
+        equation = MainEquation(consequent[0], predicate, consequent[1])
+        subsystem = SystemOfEquations(equation, Operations.OR)
+        system.equations.append(subsystem)
 
-    return main_system.calculate_answers()
+    # for eq in system.equations:
+    #     for eq2 in eq.equations:
+    #         for eq3 in eq2.equations:
+    #             print(eq3)
+    #         print()
+
+    return system.calculate_answers()
