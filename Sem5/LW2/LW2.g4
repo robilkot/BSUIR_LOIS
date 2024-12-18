@@ -17,13 +17,12 @@ kb: header implication '\n\n' rule;
 
 header: NAME '\n\n';
 implication: elements '\n' truth_degrees;
-rule: elements '\n' truth_degrees ('\n' truth_degrees)+;
+rule: elements '\n' truth_degrees ('\n' truth_degrees)*;
 
-elements: element (separator* element)+;
-truth_degrees: membership_degree (separator* membership_degree)+;
+elements: element (separator* element)*;
+truth_degrees: membership_degree (separator* membership_degree)*;
 
 element: NAME;
-// todo: only allow float from 0 to 1
 membership_degree: FLOAT;
 separator: ' ';
 NAME: [a-zA-Z] [a-zA-Z0-9]+;

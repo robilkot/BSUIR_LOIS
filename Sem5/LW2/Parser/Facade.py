@@ -13,6 +13,7 @@
 
 
 from antlr4 import InputStream, CommonTokenStream, ParseTreeWalker
+from antlr4.error.ErrorListener import ErrorListener
 
 from FuzzyLogic.FuzzySet import FuzzySet
 from FuzzyLogic.FuzzyValue import FuzzyValue
