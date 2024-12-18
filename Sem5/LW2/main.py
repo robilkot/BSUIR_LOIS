@@ -16,10 +16,11 @@ from FuzzyLogic.Solver import calculate_answer
 from Parser.Facade import parse_file
 
 if __name__ == "__main__":
-    fuzzy_set, predicate = parse_file("Input/3.kb")
-    answers = calculate_answer(fuzzy_set, predicate)
+    try:
+        fuzzy_set, predicate = parse_file("Input/2.kb")
+        answers = calculate_answer(fuzzy_set, predicate)
+        result = str(answers)
+        print(result if len(result) > 0 else "No solutions found")
+    except Exception as e:
+        print(f"Error: {e}")
 
-    # print("set:", fuzzy_set)
-    # print("pre:", predicate)
-    result = str(answers)
-    print(result if len(result) > 0 else "No solutions found")
