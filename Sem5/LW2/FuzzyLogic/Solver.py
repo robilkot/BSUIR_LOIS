@@ -11,19 +11,18 @@
 # - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
-
-from Models.MainEquation import MainEquation
-from FuzzyLogic.FuzzySet import FuzzySet
 from Models.Enums import Operations
+from Models.EquationData import EquationData
+from FuzzyLogic.FuzzySet import FuzzySet
 from Models.SystemOfEquations import SystemOfEquations
 
 
 def calculate_answer(implication: FuzzySet, rule: FuzzySet):
-    system = SystemOfEquations()
+    main_system = SystemOfEquations()
 
     for name, value in implication.items():
-        equation = MainEquation(name, rule, value)
-        subsystem = SystemOfEquations(equation, Operations.OR)
-        system.equations.append(subsystem)
+        data = EquationData(name, value, rule)
+        subsystem = SystemOfEquations(data, Operations.OR)
+        main_system.equations.append(subsystem)
 
-    return system.calculate_answers()
+    return main_system.solve()

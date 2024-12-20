@@ -4,7 +4,7 @@
 # - Робилко Тимур Маркович
 # - Абушкевич Алексей Александрович
 #
-# Файл, реализующий класс, который отвечает за представление нечеткого уравнения
+# Файл класса, реализующего структуру данных для формирования уравнений на основе входных данных программы
 # 28.11.2024
 #
 # Источники:
@@ -14,8 +14,8 @@ from FuzzyLogic.FuzzySet import FuzzySet
 from .Equation import *
 
 
-class MainEquation(dict):
-    def __init__(self, consequent_name: str, rule: FuzzySet, consequent_value: FuzzyValue):
+class EquationData(dict):
+    def __init__(self, consequent_name: str, consequent_value: FuzzyValue, rule: FuzzySet):
         super().__init__()
         self.consequent_name: str = consequent_name
         self.consequent_value: FuzzyValue = consequent_value

@@ -4,26 +4,49 @@
 # - Робилко Тимур Маркович
 # - Абушкевич Алексей Александрович
 #
-# Файл, реализующий функцию вычисления значения нечеткого предиката
+# Файл классов, представляющих операции для решения уравнений
 # 28.11.2024
 #
 # Источники:
 # - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
-from Models.Answer import Answer
-from FuzzyLogic.FuzzyInterval import FuzzyInterval
+from abc import ABC
+
+from FuzzyLogic.Interval import Interval
 from FuzzyLogic.FuzzyValue import FuzzyValue
+from Models.Answer import Answer
 
 
-def equality(x: float, y: float, name: str):
-    if y == 0.0:
-        return Answer({name: FuzzyInterval(FuzzyValue(0.0), FuzzyValue(1.0 - x))}, None)
-    elif y > x:
-        return Answer(None, None)
-    else:
-        return Answer({name: FuzzyInterval(FuzzyValue(y - x + 1.0), FuzzyValue(y - x + 1.0))}, None)
+class Operation(ABC):
+    def __call__(self, *args, **kwargs):
+        pass
+
+    def __str__(self):
+        pass
 
 
-def less_equal(x: float, y: float, name: str):
-    return Answer({name: FuzzyInterval(FuzzyValue(0.0), FuzzyValue(y - x + 1.0))}, None)
+class Solvable(ABC):
+    def solve(self) -> Answer:
+        pass
+
+
+class Equal(Operation):
+    def __call__(self, x: float, y: float, name: str) -> Answer:
+        if y == 0.0:
+            return Answer({name: Interval(FuzzyValue(0.0), FuzzyValue(1.0 - x))}, None)
+        elif y > x:
+            return Answer(None, None)
+        else:
+            return Answer({name: Interval(FuzzyValue(y - x + 1.0), FuzzyValue(y - x + 1.0))}, None)
+
+    def __str__(self) -> str:
+        return "=="
+
+
+class LessEqual(Operation):
+    def __call__(self, x: float, y: float, name: str) -> Answer:
+        return Answer({name: Interval(FuzzyValue(0.0), FuzzyValue(y - x + 1.0))}, None)
+
+    def __str__(self) -> str:
+        return "<="

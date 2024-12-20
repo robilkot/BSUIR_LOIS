@@ -4,7 +4,7 @@
 # - Робилко Тимур Маркович
 # - Абушкевич Алексей Александрович
 #
-# Файл, содержащий реализацию класса вычисленного ответа
+# Файл, содержащий реализацию класса решения уравнений
 # 28.11.2024
 #
 # Источники:
@@ -12,6 +12,7 @@
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
 from __future__ import annotations
+
 from Models.Enums import Operations
 
 
@@ -66,10 +67,6 @@ class Answer(dict):
         else:
             answers = [f'({ans})' if ans.type_of_answer == Operations.AND else str(ans) for ans in self.solutions]
             return 'U'.join(answers)
-
-    def clear(self) -> None:
-        super().clear()
-        self.solutions = list()
 
     def __eq__(self, other):
         if len(self) != len(other) or not len(self.solutions) or not len(other.solutions):

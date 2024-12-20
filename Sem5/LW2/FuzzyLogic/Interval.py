@@ -4,7 +4,7 @@
 # - Робилко Тимур Маркович
 # - Абушкевич Алексей Александрович
 #
-# Файл, содержащий класс, который отвечает за представление нечеткого интервала
+# Файл, содержащий класс, который отвечает за представление интервала
 # 28.11.2024
 #
 # Источники:
@@ -16,7 +16,7 @@ from __future__ import annotations
 from FuzzyLogic.FuzzyValue import FuzzyValue
 
 
-class FuzzyInterval:
+class Interval:
     def __init__(self, bottom: FuzzyValue, top: FuzzyValue) -> None:
         if top < bottom:
             top, bottom = bottom, top
@@ -27,13 +27,13 @@ class FuzzyInterval:
     def __contains__(self, item: FuzzyValue) -> bool:
         return self.bottom <= item <= self.top
 
-    def __mul__(self, other: FuzzyInterval | None):
+    def __mul__(self, other: Interval | None):
         if other is None:
             return None
 
         if self.bottom <= other.top and other.bottom <= self.top:
-            return FuzzyInterval(max(self.bottom, other.bottom),
-                                 min(self.top, other.top))
+            return Interval(max(self.bottom, other.bottom),
+                            min(self.top, other.top))
         else:
             return None
 
@@ -43,5 +43,5 @@ class FuzzyInterval:
         else:
             return "[" + str(self.bottom) + ";" + str(self.top) + "]"
 
-    def __eq__(self, other: FuzzyInterval) -> bool:
+    def __eq__(self, other: Interval) -> bool:
         return self.bottom == other.bottom and self.top == other.top

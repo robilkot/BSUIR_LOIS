@@ -4,7 +4,7 @@
 # - Робилко Тимур Маркович
 # - Абушкевич Алексей Александрович
 #
-# Файл, реализующий класс, который отвечает за представление нечеткого уравнения
+# Файл класса, реализующего модель уравнения
 # 28.11.2024
 #
 # Источники:
@@ -12,24 +12,22 @@
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
 
 from dataclasses import dataclass
-from typing import Callable
 
 from FuzzyLogic.FuzzyValue import FuzzyValue
 from Models.Answer import Answer
-from Models.Operations import equality, less_equal
+from Models.Operations import Operation, Solvable
 
 
 @dataclass
-class Equation:
+class Equation(Solvable):
     variable: str
     x: FuzzyValue
     y: FuzzyValue
-    binary_operator: Callable
+    solve_operation: Operation
 
-    def calculate_answers(self) -> Answer:
-        print(self)
-        return self.binary_operator(self.x.value, self.y.value, self.variable)
+    def solve(self) -> Answer:
+        # print(self)
+        return self.solve_operation(self.x.value, self.y.value, self.variable)
 
     def __str__(self) -> str:
-        op = "==" if self.binary_operator == equality else "<="
-        return f"max(0, {self.variable} + {self.x} - 1) {op} {self.y}"
+        return f"max(0, {self.variable} + {self.x} - 1) {self.solve_operation} {self.y}"
