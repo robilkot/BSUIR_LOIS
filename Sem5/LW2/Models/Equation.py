@@ -21,14 +21,15 @@ from Models.Operations import equality, less_equal
 
 @dataclass
 class Equation:
-    x_name: str
+    variable: str
     x: FuzzyValue
     y: FuzzyValue
     binary_operator: Callable
 
     def calculate_answers(self) -> Answer:
-        return self.binary_operator(self.x.value, self.y.value, self.x_name)
+        print(self)
+        return self.binary_operator(self.x.value, self.y.value, self.variable)
 
     def __str__(self) -> str:
         op = "==" if self.binary_operator == equality else "<="
-        return f"max(0, {self.x_name} + {self.x} - 1) {op} {self.y}"
+        return f"max(0, {self.variable} + {self.x} - 1) {op} {self.y}"

@@ -10,18 +10,17 @@
 # Источники:
 # - Нечёткая логика: алгебраические основы и приложения / С.Л. Блюмин, И.А. Шуйкова
 # - Логические основы интеллектуальных систем. Практикум / В.В. Голенков и др.
-
+from FuzzyLogic.FuzzySet import FuzzySet
 from .Equation import *
-from FuzzyLogic import Predicate
 
 
 class MainEquation(dict):
-    def __init__(self, consequent_name: str, predicates: Predicate.Predicate, consequent_value: FuzzyValue):
+    def __init__(self, consequent_name: str, rule: FuzzySet, consequent_value: FuzzyValue):
         super().__init__()
         self.consequent_name: str = consequent_name
         self.consequent_value: FuzzyValue = consequent_value
 
-        for predicate in predicates:
-            if predicate[0][1] != consequent_name:
+        for key, value in rule.items():
+            if key[1] != consequent_name:
                 continue
-            self[predicate[0][0]] = predicate[1]
+            self[key[0]] = value

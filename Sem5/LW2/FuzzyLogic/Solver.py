@@ -18,14 +18,11 @@ from Models.Enums import Operations
 from Models.SystemOfEquations import SystemOfEquations
 
 
-def calculate_answer(fuzzy_set: FuzzySet, predicate):
-    if len(fuzzy_set) != len([x for x in predicate if x[0][0][1] == predicate[0][0][0][1]]):
-        raise ValueError("Incorrect dimensions")
-
+def calculate_answer(implication: FuzzySet, rule: FuzzySet):
     system = SystemOfEquations()
 
-    for consequent in fuzzy_set:
-        equation = MainEquation(consequent[0], predicate, consequent[1])
+    for name, value in implication.items():
+        equation = MainEquation(name, rule, value)
         subsystem = SystemOfEquations(equation, Operations.OR)
         system.equations.append(subsystem)
 

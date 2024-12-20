@@ -17,31 +17,31 @@ from FuzzyLogic.FuzzyValue import FuzzyValue
 
 
 class FuzzyInterval:
-    def __init__(self, lower_border: FuzzyValue, upper_border: FuzzyValue) -> None:
-        if upper_border < lower_border:
-            upper_border, lower_border = lower_border, upper_border
+    def __init__(self, bottom: FuzzyValue, top: FuzzyValue) -> None:
+        if top < bottom:
+            top, bottom = bottom, top
 
-        self.lower_border: FuzzyValue = lower_border
-        self.upper_border: FuzzyValue = upper_border
+        self.bottom: FuzzyValue = bottom
+        self.top: FuzzyValue = top
 
     def __contains__(self, item: FuzzyValue) -> bool:
-        return self.lower_border <= item <= self.upper_border
+        return self.bottom <= item <= self.top
 
     def __mul__(self, other: FuzzyInterval | None):
         if other is None:
             return None
 
-        if self.lower_border <= other.upper_border and other.lower_border <= self.upper_border:
-            return FuzzyInterval(max(self.lower_border, other.lower_border),
-                                 min(self.upper_border, other.upper_border))
+        if self.bottom <= other.top and other.bottom <= self.top:
+            return FuzzyInterval(max(self.bottom, other.bottom),
+                                 min(self.top, other.top))
         else:
             return None
 
     def __str__(self) -> str:
-        if self.lower_border.value == self.upper_border.value:
-            return "{" + str(self.lower_border) + "}"
+        if self.bottom.value == self.top.value:
+            return "{" + str(self.bottom) + "}"
         else:
-            return "[" + str(self.lower_border) + ";" + str(self.upper_border) + "]"
+            return "[" + str(self.bottom) + ";" + str(self.top) + "]"
 
     def __eq__(self, other: FuzzyInterval) -> bool:
-        return self.lower_border == other.lower_border and self.upper_border == other.upper_border
+        return self.bottom == other.bottom and self.top == other.top
